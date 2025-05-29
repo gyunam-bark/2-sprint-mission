@@ -1,0 +1,43 @@
+{
+  "name": "sprint3",
+  "version": "1.0.0",
+  "main": "index.mjs",
+  "scripts": {
+    "docker:up": "docker compose up -d",
+    "docker:down": "docker compose down --volumes",
+    "docker:clean": "docker compose down --volumes --rmi all --remove-orphans",
+    "dev": "nodemon index.mjs",
+    "start": "node index.mjs"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gyunam-bark/2-sprint-mission.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/gyunam-bark/2-sprint-mission/issues"
+  },
+  "homepage": "https://github.com/gyunam-bark/2-sprint-mission#readme",
+  "description": "",
+  "type": "module",
+  "dependencies": {
+    "@prisma/client": "^6.8.2",
+    "axios": "^1.9.0",
+    "bcrypt": "^6.0.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.5.0",
+    "express": "^5.1.0",
+    "fs-extra": "^11.3.0",
+    "is-email": "^1.0.2",
+    "is-uuid": "^1.0.2",
+    "jsonwebtoken": "^9.0.2",
+    "morgan": "^1.10.0",
+    "multer": "^2.0.0",
+    "superstruct": "^2.0.2"
+  },
+  "devDependencies": {
+    "prisma": "^6.8.2"
+  }
+}
