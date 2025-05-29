@@ -1,5 +1,5 @@
 node_modules/
 .env
-prisma/migratiions/*
+prisma/migrations/*
 storage/*
 *.DS_Store
