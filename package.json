@@ -6,7 +6,7 @@
     "docker:up": "docker compose up -d",
     "docker:down": "docker compose down --volumes",
     "docker:clean": "docker compose down --volumes --rmi all --remove-orphans",
-    "build": "npm i && npx prisma migrate dev --name init && npx prisma studio",
+    "build": "npm i && npx prisma migrate dev --name init",
     "dev": "nodemon index.mjs",
     "start": "node index.mjs"
   },
