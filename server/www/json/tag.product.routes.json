@@ -1,0 +1,59 @@
+{
+  "name": "tags/product",
+  "endpoints": [
+    {
+      "method": "POST",
+      "path": "/tags/product",
+      "body": {
+        "name": "string"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/tags/product",
+      "query": {
+        "sort": "string",
+        "query": "string",
+        "showInactive": "string"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/tags/product/:id",
+      "params": {
+        "id": "string"
+      }
+    },
+    {
+      "method": "PATCH",
+      "path": "/tags/product/:id",
+      "params": {
+        "id": "string"
+      },
+      "body": {
+        "name": "string"
+      }
+    },
+    {
+      "method": "PATCH",
+      "path": "/tags/product/deactivate/:id",
+      "params": {
+        "id": "string"
+      }
+    },
+    {
+      "method": "PATCH",
+      "path": "/tags/product/activate/:id",
+      "params": {
+        "id": "string"
+      }
+    },
+    {
+      "method": "DELETE",
+      "path": "/tags/product/:id",
+      "params": {
+        "id": "string"
+      }
+    }
+  ]
+}
