@@ -33,3 +33,20 @@ export const getUserDetail = async (param, user) => {
     throw error;
   }
 };
+
+export const unlock = async (param) => {
+  try {
+    const { id } = param;
+
+    const existUser = await prisma.user.findUnique({
+      where: { id },
+    });
+    if (!existUser) {
+      throw HttpError(404, '사용자를 찾을 수 없습니다.');
+    }
+
+    await prisma.user.update({ where: { id }, data: { loginAttempts: 0 } });
+  } catch (error) {
+    throw error;
+  }
+};

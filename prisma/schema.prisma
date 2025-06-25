@@ -18,6 +18,12 @@ enum ProductStatus {
   sold_out
 }
 
+enum UserStatus {
+  active
+  inactive
+  lock
+}
+
 enum CommonStatus {
   active
   inactive
@@ -28,7 +34,7 @@ model User {
   nickname        String
   email           String           @unique
   password        String
-  status          CommonStatus     @default(active)
+  status          UserStatus       @default(active)
   role            UserRole         @default(user)
   image           Image?           @relation(fields: [imageId], references: [id])
   imageId         String?
@@ -38,7 +44,7 @@ model User {
   deletedAt       DateTime?
   lastLoginAt     DateTime?
   lastLoginIp     String?
-  loginAttempts   Int @default(0)
+  loginAttempts   Int              @default(0)
   products        Product[]
   articles        Article[]
   productComments ProductComment[]

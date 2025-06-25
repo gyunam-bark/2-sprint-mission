@@ -10,6 +10,7 @@ import {
   setRefreshToken,
 } from '../util/token-util.js';
 import { getUser } from '../util/user-util.js';
+import { getIpFromContext } from '../util/from-util.js';
 
 // 사용자 생성
 export const handleRegister = async (c) => {
@@ -65,7 +66,9 @@ export const handleLogin = async (c) => {
   try {
     const { body } = await getValidate(c);
 
-    const { accessToken, refreshToken, cookieOptionAccess, cookieOptionRefresh } = await login(body);
+    const ip = getIpFromContext(c);
+
+    const { accessToken, refreshToken, cookieOptionAccess, cookieOptionRefresh } = await login(body, ip);
 
     setAccessToken(c, accessToken, cookieOptionAccess);
     setRefreshToken(c, refreshToken, cookieOptionRefresh);

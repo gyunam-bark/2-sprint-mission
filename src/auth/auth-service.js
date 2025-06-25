@@ -13,7 +13,7 @@ import { addHours, addDays } from 'date-fns';
 import { COOKIE_OPTIONS, REDIS_SET } from './auth-constant.js';
 import redis from '../redis/redis.js';
 import { runWithdrawTransaction } from '../prisma/transaction.js';
-import COMMON_STATUS from '../common/common-status.js';
+import USER_STATUS from '../common/user-status.js';
 
 export const register = async (body) => {
   try {
@@ -57,7 +57,7 @@ export const withdraw = async (user, body) => {
       throw new HttpError(400, '비밀번호가 잘못 되었습니다.');
     }
 
-    const transactionData = { status: COMMON_STATUS.INACTIVE, deletedAt: new Date() };
+    const transactionData = { status: USER_STATUS.INACTIVE, deletedAt: new Date() };
 
     const results = await runWithdrawTransaction(existUser.id, transactionData);
 
@@ -69,7 +69,7 @@ export const withdraw = async (user, body) => {
   }
 };
 
-export const login = async (body) => {
+export const login = async (body, ip) => {
   try {
     const { email, password } = body;
 
@@ -78,17 +78,38 @@ export const login = async (body) => {
       throw new HttpError(400, '접속 정보를 다시 확인해주세요.');
     }
 
-    const isInactive = existUser.status === COMMON_STATUS.INACTIVE;
+    if (existUser.loginAttempts >= ENV.LOGIN_ATTEMPTS_MAX) {
+      throw new HttpError(400, '시도 횟수가 5번이 넘었습니다. 관리자에게 연락해주세요.');
+    }
+
+    const isInactive = existUser.status === USER_STATUS.INACTIVE;
     if (isInactive) {
       throw new HttpError(400, '접속할 수 없는 계정입니다.');
     }
 
     const isValidPassword = await comparePassword(password, existUser.password);
     if (!isValidPassword) {
+      await prisma.user.update({
+        where: { id: existUser.id },
+        data: {
+          loginAttempts: {
+            increment: 1,
+          },
+        },
+      });
+
       throw new HttpError(400, '접속 정보를 다시 확인해주세요.');
     }
 
-    const payload = new Payload(existUser);
+    const loggedinUser = await prisma.user.update({
+      where: { id: existUser.id },
+      data: {
+        lastLoginAt: new Date(),
+        lastLoginIp: ip,
+      },
+    });
+
+    const payload = new Payload(loggedinUser);
 
     const accessToken = generateAccessToken(payload);
     const refreshToken = generateRefreshToken(payload);
@@ -98,10 +119,10 @@ export const login = async (body) => {
     const refreshExpiresAt = addDays(now, ENV.REFRESH_EXPIRY_VALUE);
 
     await prisma.refreshToken.upsert({
-      where: { userId: existUser.id },
+      where: { userId: loggedinUser.id },
       update: { token: refreshToken },
       create: {
-        userId: existUser.id,
+        userId: loggedinUser.id,
         token: refreshToken,
         expiresAt: refreshExpiresAt,
       },

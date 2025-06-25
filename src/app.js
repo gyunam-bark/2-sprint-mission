@@ -2,12 +2,13 @@ import ENV from './config/env.js';
 import { Hono } from 'hono';
 import { poweredBy } from 'hono/powered-by';
 import { logger } from 'hono/logger';
+import { notFoundHandler } from './handler/not-found-handler.js';
 import { errorHandler } from './handler/error-handler.js';
 import { serve } from '@hono/node-server';
 import rootRoute from './root/root-router.js';
 import authRoute from './auth/auth-router.js';
-import { notFoundHandler } from './handler/not-found-handler.js';
 import usersRoute from './users/users-router.js';
+import imagesRoute from './images/images-router.js';
 
 const app = new Hono();
 
@@ -19,6 +20,7 @@ app.use(logger());
 app.route('/', rootRoute);
 app.route('/auth', authRoute);
 app.route('/users', usersRoute);
+app.route('/images', imagesRoute);
 
 // 404 NOT FOUND HANDLER
 app.notFound(notFoundHandler);

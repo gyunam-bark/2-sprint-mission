@@ -1,6 +1,6 @@
 import { getUser } from '../util/user-util.js';
 import { getValidate } from '../util/validate-util.js';
-import { getUserDetail } from './users-service.js';
+import { getUserDetail, unlock } from './users-service.js';
 
 export const handleGetUserDetail = async (c) => {
   try {
@@ -12,6 +12,22 @@ export const handleGetUserDetail = async (c) => {
     const response = {
       success: true,
       data: userDetail,
+    };
+
+    return c.json(response, 200);
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const handleUnlock = async (c) => {
+  try {
+    const { param } = await getValidate(c);
+
+    await unlock(param);
+
+    const response = {
+      success: true,
     };
 
     return c.json(response, 200);
