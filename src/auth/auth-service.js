@@ -3,27 +3,20 @@ import { Payload } from './auth-model.js';
 import prisma from '../prisma/prisma.js';
 import { hashPassword, comparePassword } from '../util/crypt-util.js';
 import { HttpError } from '../util/error-util.js';
-import {
-  generateAccessToken,
-  generateRefreshToken,
-  getAccessTokenRemainSeconds,
-  verifyRefreshToken,
-} from '../util/token-util.js';
+import { generateAccessToken, generateRefreshToken, verifyRefreshToken } from '../util/token-util.js';
 import { addHours, addDays } from 'date-fns';
-import { COOKIE_OPTIONS, REDIS_SET } from './auth-constant.js';
-import redis from '../redis/redis.js';
 import { runWithdrawTransaction } from '../prisma/transaction.js';
-import USER_STATUS from '../common/user-status.js';
+import { COOKIE_OPTIONS } from './auth-constant.js';
+import { USER_STATUS } from '../constant/constant.js';
+import { addAccessTokenToBlacklist } from '../util/redis-util.js';
+import { getExistUser, checkExistUserWithEmail, checkUserLock, checkUserInactive } from '../util/user-util.js';
 
 export const register = async (body) => {
   try {
     const { email, password, nickname } = body;
 
     // 해당 EMAIL 로 생성된 사용자가 있는지 확인
-    const existUser = await prisma.user.findUnique({ where: { email } });
-    if (existUser) {
-      throw new HttpError(409, '이미 해당 이메일로 가입된 사용자가 있습니다.');
-    }
+    await checkExistUserWithEmail(email);
 
     // 비밀번호 해시
     const hashedPassword = await hashPassword(password);
@@ -47,15 +40,9 @@ export const withdraw = async (user, body) => {
   try {
     const { password } = body;
 
-    const existUser = await prisma.user.findUnique({ where: { id: user.id } });
-    if (!existUser) {
-      throw new HttpError(400, '존재하지 않는 사용자입니다.');
-    }
+    const existUser = await getExistUser({ id: user.id });
 
-    const isValidPassword = await comparePassword(password, existUser.password);
-    if (!isValidPassword) {
-      throw new HttpError(400, '비밀번호가 잘못 되었습니다.');
-    }
+    await comparePassword(password, existUser.password);
 
     const transactionData = { status: USER_STATUS.INACTIVE, deletedAt: new Date() };
 
@@ -73,23 +60,13 @@ export const login = async (body, ip) => {
   try {
     const { email, password } = body;
 
-    const existUser = await prisma.user.findUnique({ where: { email } });
-    if (!existUser) {
-      throw new HttpError(400, '접속 정보를 다시 확인해주세요.');
-    }
+    const existUser = await getExistUser({ email });
 
-    if (existUser.loginAttempts >= ENV.LOGIN_ATTEMPTS_MAX) {
-      throw new HttpError(400, '시도 횟수가 5번이 넘었습니다. 관리자에게 연락해주세요.');
-    }
+    checkUserInactive(existUser);
+    checkUserLock(existUser);
 
-    const isInactive = existUser.status === USER_STATUS.INACTIVE;
-    if (isInactive) {
-      throw new HttpError(400, '접속할 수 없는 계정입니다.');
-    }
-
-    const isValidPassword = await comparePassword(password, existUser.password);
-    if (!isValidPassword) {
-      await prisma.user.update({
+    await comparePassword(password, existUser.password, async () => {
+      const attemptedUser = await prisma.user.update({
         where: { id: existUser.id },
         data: {
           loginAttempts: {
@@ -98,8 +75,15 @@ export const login = async (body, ip) => {
         },
       });
 
-      throw new HttpError(400, '접속 정보를 다시 확인해주세요.');
-    }
+      if (attemptedUser.loginAttempts >= ENV.LOGIN_ATTEMPTS_MAX) {
+        await prisma.user.update({
+          where: { id: attemptedUser.id },
+          data: {
+            status: USER_STATUS.LOCK,
+          },
+        });
+      }
+    });
 
     const loggedinUser = await prisma.user.update({
       where: { id: existUser.id },
@@ -164,14 +148,7 @@ export const logout = async (accessToken, refreshToken) => {
 
     const userId = payload.id;
 
-    const expirySeconds = getAccessTokenRemainSeconds(accessToken);
-
-    await redis.set(
-      REDIS_SET.KEY(accessToken),
-      REDIS_SET.VALUE.BLACKLIST,
-      REDIS_SET.SECONDS_TOKEN,
-      REDIS_SET.SECONDS(expirySeconds)
-    );
+    await addAccessTokenToBlacklist(accessToken);
 
     await prisma.refreshToken.deleteMany({ where: { userId } });
   } catch (error) {
@@ -186,10 +163,7 @@ export const refresh = async (token) => {
       throw new HttpError(500);
     }
 
-    const existUser = await prisma.user.findUnique({ where: { id: payload.id } });
-    if (!existUser) {
-      throw new HttpError(400);
-    }
+    const existUser = await getExistUser({ id: payload.id });
 
     const accessToken = generateAccessToken(payload);
     const refreshToken = generateRefreshToken(payload);

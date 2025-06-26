@@ -2,8 +2,8 @@ import path, { dirname } from 'path';
 import fs from 'fs/promises';
 import { fileURLToPath } from 'url';
 import { HttpError } from '../util/error-util.js';
-import { getImageFromContext } from '../util/from-util.js';
-import { uploadImage } from './images-service.js';
+import { getImageFromContext, getParamFromContext } from '../util/from-util.js';
+import { deleteImage, uploadImage } from './images-service.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -31,6 +31,29 @@ export const handleUploadImage = async (c) => {
     const response = {
       success: true,
       data: createdImage,
+    };
+
+    return c.json(response, 200);
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const handleDeleteImage = async (c) => {
+  try {
+    const { id } = await getParamFromContext(c);
+
+    const deletedImage = await deleteImage(id);
+
+    if (deletedImage.path) {
+      const filePath = path.resolve(rootPath, deletedImage.path);
+
+      await fs.unlink(filePath);
+    }
+
+    const response = {
+      success: true,
+      data: deletedImage,
     };
 
     return c.json(response, 200);

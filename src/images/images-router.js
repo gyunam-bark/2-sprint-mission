@@ -1,10 +1,13 @@
 import { Hono } from 'hono';
 import { allow } from '../middleware/role-middleware.js';
-import { handleUploadImage } from './images-controller.js';
-import USER_ROLE from '../common/user-role.js';
+import { handleDeleteImage, handleUploadImage } from './images-controller.js';
+import { USER_ROLE } from '../constant/constant.js';
+import { deleteImageSchema, validate } from '../middleware/validate-middleware.js';
 
 const images = new Hono();
 
+// 이미지 업로드
 images.post('/', allow([USER_ROLE.USER]), handleUploadImage);
+images.delete('/:id', allow([USER_ROLE.MASTER]), validate(deleteImageSchema), handleDeleteImage);
 
 export default images;

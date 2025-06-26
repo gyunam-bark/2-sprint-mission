@@ -3,7 +3,7 @@ import { handleLogin, handleLogout, handleRefresh, handleRegister, handleWithdra
 import { loginSchema, registerSchema, validate, withdrawSchema } from '../middleware/validate-middleware.js';
 import { checkBlacklistToken } from '../middleware/blacklist-middleware.js';
 import { allow } from '../middleware/role-middleware.js';
-import USER_ROLE from '../common/user-role.js';
+import { USER_ROLE } from '../constant/constant.js';
 
 const auth = new Hono();
 

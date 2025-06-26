@@ -50,9 +50,9 @@ model User {
   productComments ProductComment[]
   articleComments ArticleComment[]
   refreshToken    RefreshToken[]
-  productLikes ProductLike[]
-  articleLikes ArticleLike[]
-  commentLikes CommentLike[]
+  productLikes    ProductLike[]
+  articleLikes    ArticleLike[]
+  commentLikes    CommentLike[]
 }
 
 model Product {
@@ -166,9 +166,9 @@ model Image {
 
 model ProductLike {
   id        String   @id @default(uuid())
-  user      User     @relation(fields: [userId], references: [id])
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId    String
-  product   Product  @relation(fields: [productId], references: [id])
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
   productId String
   createdAt DateTime @default(now())
 
@@ -177,9 +177,9 @@ model ProductLike {
 
 model ArticleLike {
   id        String   @id @default(uuid())
-  user      User     @relation(fields: [userId], references: [id])
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId    String
-  article   Article  @relation(fields: [articleId], references: [id])
+  article   Article  @relation(fields: [articleId], references: [id], onDelete: Cascade)
   articleId String
   createdAt DateTime @default(now())
 
@@ -188,13 +188,13 @@ model ArticleLike {
 
 model CommentLike {
   id                String           @id @default(uuid())
-  user              User             @relation(fields: [userId], references: [id])
+  user              User             @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId            String
 
-  productComment    ProductComment? @relation(fields: [productCommentId], references: [id])
+  productComment    ProductComment? @relation(fields: [productCommentId], references: [id], onDelete: Cascade)
   productCommentId  String?
 
-  articleComment    ArticleComment? @relation(fields: [articleCommentId], references: [id])
+  articleComment    ArticleComment? @relation(fields: [articleCommentId], references: [id], onDelete: Cascade)
   articleCommentId  String?
 
   createdAt         DateTime         @default(now())
@@ -208,7 +208,7 @@ model RefreshToken {
   id        String   @id @default(uuid())
   token     String
   userId    String   @unique
-  user      User     @relation(fields: [userId], references: [id])
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())
   expiresAt DateTime
 }

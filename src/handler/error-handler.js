@@ -1,4 +1,4 @@
-import { NODE_ENV_OPTION } from '../common/node-env.js';
+import { NODE_ENV_OPTION } from '../constant/constant.js';
 import ENV from '../config/env.js';
 
 export const errorHandler = (err, c) => {

@@ -13,16 +13,3 @@ export const COOKIE_OPTIONS = {
     STRICT: 'strict',
   },
 };
-
-export const REDIS_SET = {
-  KEY: (token) => `bl_${token}`,
-  VALUE: {
-    BLACKLIST: 'balcklisted',
-  },
-  SECONDS_TOKEN: 'EX',
-  SECONDS: (seconds) => seconds,
-};
-
-export const REDIS_GET = {
-  KEY: (token) => `bl_${token}`,
-};

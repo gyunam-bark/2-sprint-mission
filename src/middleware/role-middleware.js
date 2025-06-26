@@ -1,4 +1,4 @@
-import USER_ROLE from '../common/user-role.js';
+import { USER_ROLE } from '../constant/constant.js';
 import { HttpError } from '../util/error-util.js';
 import { getAccessToken, verifyAccessToken } from '../util/token-util.js';
 import { setUser } from '../util/user-util.js';
