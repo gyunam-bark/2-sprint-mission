@@ -148,6 +148,11 @@ export const deleteProductSchema = {
     password: Joi.string().min(8).optional(),
   }),
 };
+export const likeProductSchema = {
+  param: Joi.object({
+    id: Joi.string().uuid().required(),
+  }),
+};
 
 // ===========================================
 // = PRODUCT COMMENTS
@@ -164,10 +169,57 @@ export const getProductCommentListSchema = {
     isLiked: Joi.bool().optional(),
   }),
 };
+export const createProductCommentSchema = {
+  param: Joi.object({
+    id: Joi.string().uuid().required(),
+  }),
+  body: Joi.object({
+    content: Joi.string().min(1).required(),
+  }),
+};
+export const updateProductCommentSchema = {
+  param: Joi.object({
+    id: Joi.string().uuid().required(),
+  }),
+  body: Joi.object({
+    content: Joi.string().min(1).required(),
+  }),
+};
+export const deactivateProductCommentSchema = {
+  param: Joi.object({
+    id: Joi.string().uuid().required(),
+  }),
+};
+export const activateProductCommentSchema = {
+  param: Joi.object({
+    id: Joi.string().uuid().required(),
+  }),
+};
+export const deleteProductCommentSchema = {
+  param: Joi.object({
+    id: Joi.string().uuid().required(),
+  }),
+  body: Joi.object({
+    password: Joi.string().min(8).optional(),
+  }),
+};
+export const likeProductCommentSchema = {
+  param: Joi.object({
+    id: Joi.string().uuid().required(),
+  }),
+};
 
 // ===========================================
 // = ARTICLES
 // ===========================================
+export const createArticleSchema = {
+  body: Joi.object({
+    title: Joi.string().min(1).required(),
+    content: Joi.string().min(1).required(),
+    tags: Joi.array().items(Joi.string().uuid()).min(0).optional(),
+    images: Joi.array().items(Joi.string().uuid()).min(0).optional(),
+  }),
+};
 export const getArticleListSchema = {
   param: Joi.object({
     id: Joi.string().uuid().optional(),
@@ -178,6 +230,100 @@ export const getArticleListSchema = {
     sort: Joi.string().valid(COMMON_SORT.LATEST, COMMON_SORT.OLDEST).optional(),
     keyword: Joi.string().optional(),
     isLiked: Joi.bool().optional(),
+  }),
+};
+export const getArticleDetailSchema = {
+  param: Joi.object({
+    id: Joi.string().uuid().required(),
+  }),
+};
+export const updateArticleSchema = {
+  param: Joi.object({
+    id: Joi.string().uuid().required(),
+  }),
+  body: Joi.object({
+    title: Joi.string().min(1).required(),
+    content: Joi.string().min(1).required(),
+    tags: Joi.array().items(Joi.string().uuid()).min(0).optional(),
+    images: Joi.array().items(Joi.string().uuid()).min(0).optional(),
+  }),
+};
+export const deactivateArticleSchema = {
+  param: Joi.object({
+    id: Joi.string().uuid().required(),
+  }),
+};
+export const activateArticleSchema = {
+  param: Joi.object({
+    id: Joi.string().uuid().required(),
+  }),
+};
+export const deleteArticleSchema = {
+  param: Joi.object({
+    id: Joi.string().uuid().required(),
+  }),
+  body: Joi.object({
+    password: Joi.string().min(8).optional(),
+  }),
+};
+export const likeArticleSchema = {
+  param: Joi.object({
+    id: Joi.string().uuid().required(),
+  }),
+};
+
+// ===========================================
+// = ARTICLE COMMENTS
+// ===========================================
+export const getArticleCommentListSchema = {
+  param: Joi.object({
+    id: Joi.string().uuid().optional(),
+  }),
+  query: Joi.object({
+    skip: Joi.number().min(0).optional(),
+    take: Joi.number().min(0).optional(),
+    sort: Joi.string().valid(COMMON_SORT.LATEST, COMMON_SORT.OLDEST).optional(),
+    keyword: Joi.string().optional(),
+    isLiked: Joi.bool().optional(),
+  }),
+};
+export const createArticleCommentSchema = {
+  param: Joi.object({
+    id: Joi.string().uuid().required(),
+  }),
+  body: Joi.object({
+    content: Joi.string().min(1).required(),
+  }),
+};
+export const updateArticleCommentSchema = {
+  param: Joi.object({
+    id: Joi.string().uuid().required(),
+  }),
+  body: Joi.object({
+    content: Joi.string().min(1).required(),
+  }),
+};
+export const deactivateArticleCommentSchema = {
+  param: Joi.object({
+    id: Joi.string().uuid().required(),
+  }),
+};
+export const activateArticleCommentSchema = {
+  param: Joi.object({
+    id: Joi.string().uuid().required(),
+  }),
+};
+export const deleteArticleCommentSchema = {
+  param: Joi.object({
+    id: Joi.string().uuid().required(),
+  }),
+  body: Joi.object({
+    password: Joi.string().min(8).optional(),
+  }),
+};
+export const likeArticleCommentSchema = {
+  param: Joi.object({
+    id: Joi.string().uuid().required(),
   }),
 };
 

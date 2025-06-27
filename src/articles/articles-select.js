@@ -1,10 +1,8 @@
-export const PRODUCTS_SELECT_MASTER = {
+export const ARTICLES_SELECT_MASTER = {
   id: true,
   user: true,
-  name: true,
-  description: true,
-  price: true,
-  stock: true,
+  title: true,
+  content: true,
   tags: true,
   status: true,
   createdAt: true,
@@ -15,11 +13,9 @@ export const PRODUCTS_SELECT_MASTER = {
   likes: true,
 };
 
-export const PRODUCTS_SELECT_OWNER = {
-  name: true,
-  description: true,
-  price: true,
-  stock: true,
+export const ARTICLES_SELECT_OWNER = {
+  title: true,
+  content: true,
   tags: true,
   createdAt: true,
   updatedAt: true,
@@ -28,11 +24,9 @@ export const PRODUCTS_SELECT_OWNER = {
   likes: true,
 };
 
-export const PRODUCTS_SELECT_USER = {
-  name: true,
-  description: true,
-  price: true,
-  stock: true,
+export const ARTICLES_SELECT_USER = {
+  title: true,
+  content: true,
   tags: true,
   createdAt: true,
   updatedAt: true,

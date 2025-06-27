@@ -17,11 +17,11 @@ export const handleGetUserDetail = async (c) => {
     const { param } = await getValidate(c);
     const user = await getUser(c);
 
-    const userDetail = await getUserDetail(param, user);
+    const gotUserDetail = await getUserDetail(param, user);
 
     const response = {
       success: true,
-      data: userDetail,
+      data: gotUserDetail,
     };
 
     return c.json(response, 200);

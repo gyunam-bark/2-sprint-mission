@@ -154,3 +154,48 @@ export const runDeleteProductTransaction = async (productId) => {
     }),
   ]);
 };
+
+export const runDectivateArticleTransaction = async (articleId) => {
+  const data = { status: COMMON_STATUS.INACTIVE };
+
+  return await prisma.$transaction([
+    prisma.articleComment.updateMany({
+      where: { articleId },
+      data: data,
+    }),
+    prisma.article.update({
+      where: { id: articleId },
+      data: data,
+    }),
+  ]);
+};
+
+export const runActivateArticleTransaction = async (articleId) => {
+  const data = { status: COMMON_STATUS.ACTIVE };
+
+  return await prisma.$transaction([
+    prisma.articleComment.updateMany({
+      where: { articleId },
+      data: data,
+    }),
+    prisma.article.update({
+      where: { id: articleId },
+      data: data,
+    }),
+  ]);
+};
+
+export const runDeleteArticleTransaction = async (articleId) => {
+  const archivedUser = await getArchivedUser();
+  const data = { userId: archivedUser.id };
+
+  return await prisma.$transaction([
+    prisma.productComment.updateMany({
+      where: { articleId },
+      data: data,
+    }),
+    prisma.product.delete({
+      where: { id: articleId },
+    }),
+  ]);
+};

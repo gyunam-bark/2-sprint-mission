@@ -30,29 +30,30 @@ enum CommonStatus {
 }
 
 model User {
-  id              String           @id @default(uuid())
-  nickname        String
-  email           String           @unique
-  password        String
-  status          UserStatus       @default(active)
-  role            UserRole         @default(user)
-  image           Image?           @relation(fields: [imageId], references: [id])
-  imageId         String?
-  isArchiveUser   Boolean          @default(false)
-  createdAt       DateTime         @default(now())
-  updatedAt       DateTime         @updatedAt
-  deletedAt       DateTime?
-  lastLoginAt     DateTime?
-  lastLoginIp     String?
-  loginAttempts   Int              @default(0)
-  products        Product[]
-  articles        Article[]
-  productComments ProductComment[]
-  articleComments ArticleComment[]
-  refreshToken    RefreshToken[]
-  productLikes    ProductLike[]
-  articleLikes    ArticleLike[]
-  commentLikes    CommentLike[]
+  id                  String               @id @default(uuid())
+  nickname            String
+  email               String               @unique
+  password            String
+  status              UserStatus           @default(active)
+  role                UserRole             @default(user)
+  image               Image?               @relation(fields: [imageId], references: [id])
+  imageId             String?
+  isArchiveUser       Boolean              @default(false)
+  createdAt           DateTime             @default(now())
+  updatedAt           DateTime             @updatedAt
+  deletedAt           DateTime?
+  lastLoginAt         DateTime?
+  lastLoginIp         String?
+  loginAttempts       Int                  @default(0)
+  products            Product[]
+  articles            Article[]
+  productComments     ProductComment[]
+  articleComments     ArticleComment[]
+  refreshToken        RefreshToken[]
+  productLikes        ProductLike[]
+  articleLikes        ArticleLike[]
+  productCommentLikes ProductCommentLike[]
+  articleCommentLikes ArticleCommentLike[]
 }
 
 model Product {
@@ -74,17 +75,17 @@ model Product {
 }
 
 model ProductComment {
-  id        String       @id @default(uuid())
+  id        String               @id @default(uuid())
   content   String
-  user      User         @relation(fields: [userId], references: [id])
+  user      User                 @relation(fields: [userId], references: [id])
   userId    String
-  product   Product      @relation(fields: [productId], references: [id])
+  product   Product              @relation(fields: [productId], references: [id])
   productId String
-  status    CommonStatus @default(active)
-  createdAt DateTime     @default(now())
-  updatedAt DateTime     @updatedAt
+  status    CommonStatus         @default(active)
+  createdAt DateTime             @default(now())
+  updatedAt DateTime             @updatedAt
   deletedAt DateTime?
-  likes      CommentLike[]
+  likes     ProductCommentLike[]
 }
 
 model Article {
@@ -100,21 +101,21 @@ model Article {
   deletedAt DateTime?
   images    ArticleImageLink[]
   comments  ArticleComment[]
-  likes      ArticleLike[]
+  likes     ArticleLike[]
 }
 
 model ArticleComment {
-  id        String       @id @default(uuid())
+  id        String               @id @default(uuid())
   content   String
-  user      User         @relation(fields: [userId], references: [id])
+  user      User                 @relation(fields: [userId], references: [id])
   userId    String
-  article   Article      @relation(fields: [articleId], references: [id])
+  article   Article              @relation(fields: [articleId], references: [id])
   articleId String
-  status    CommonStatus @default(active)
-  createdAt DateTime     @default(now())
-  updatedAt DateTime     @updatedAt
+  status    CommonStatus         @default(active)
+  createdAt DateTime             @default(now())
+  updatedAt DateTime             @updatedAt
   deletedAt DateTime?
-  likes      CommentLike[]
+  likes     ArticleCommentLike[]
 }
 
 model ProductImageLink {
@@ -186,24 +187,28 @@ model ArticleLike {
   @@unique([userId, articleId])
 }
 
-model CommentLike {
-  id                String           @id @default(uuid())
-  user              User             @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId            String
-
-  productComment    ProductComment?  @relation(fields: [productCommentId], references: [id], onDelete: Cascade)
-  productCommentId  String?
-
-  articleComment    ArticleComment?  @relation(fields: [articleCommentId], references: [id], onDelete: Cascade)
-  articleCommentId  String?
-
-  createdAt         DateTime         @default(now())
+model ProductCommentLike {
+  id               String         @id @default(uuid())
+  user             User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId           String
+  productComment   ProductComment @relation(fields: [productCommentId], references: [id], onDelete: Cascade)
+  productCommentId String
+  createdAt        DateTime       @default(now())
 
   @@unique([userId, productCommentId])
+}
+
+model ArticleCommentLike {
+  id               String         @id @default(uuid())
+  user             User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId           String
+  articleComment   ArticleComment @relation(fields: [articleCommentId], references: [id], onDelete: Cascade)
+  articleCommentId String
+  createdAt        DateTime       @default(now())
+
   @@unique([userId, articleCommentId])
 }
 
-// REFRESH_TOKEN
 model RefreshToken {
   id        String   @id @default(uuid())
   token     String

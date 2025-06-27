@@ -2,13 +2,13 @@ import prisma from '../prisma/prisma.js';
 import { HttpError } from './error-util.js';
 
 export const getExistProduct = async (where) => {
-  const existUser = await prisma.product.findUnique({
+  const existProduct = await prisma.product.findUnique({
     where,
   });
-  if (!existUser) {
+  if (!existProduct) {
     throw new HttpError(404, '제품을 찾을 수 없습니다.');
   }
-  return existUser;
+  return existProduct;
 };
 
 export const checkProductTagList = async (tags) => {
@@ -30,4 +30,35 @@ export const checkProductTagList = async (tags) => {
     };
   }
   return tagsOption;
+};
+
+export const toggleProductLike = async (productId, userId) => {
+  const existProductLike = await prisma.productLike.findUnique({
+    where: {
+      userId_productId: {
+        userId,
+        productId,
+      },
+    },
+  });
+
+  if (existProductLike) {
+    const unlikedProduct = await prisma.productLike.delete({
+      where: {
+        userId_productId: {
+          userId,
+          productId,
+        },
+      },
+    });
+    return unlikedProduct;
+  } else {
+    const likedProduct = await prisma.productLike.create({
+      data: {
+        user: { connect: { id: userId } },
+        product: { connect: { id: productId } },
+      },
+    });
+    return likedProduct;
+  }
 };

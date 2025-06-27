@@ -5,11 +5,12 @@ import {
   runDectivateProductTransaction,
   runDeleteProductTransaction,
 } from '../prisma/transaction.js';
+import { comparePassword } from '../util/crypt-util.js';
 import { HttpError } from '../util/error-util.js';
 import { checkImageList } from '../util/image-util.js';
-import { checkProductTagList, getExistProduct } from '../util/product-util.js';
+import { checkProductTagList, getExistProduct, toggleProductLike } from '../util/product-util.js';
 import { toOrderBy } from '../util/to-util.js';
-import { isUserMaster, isUserOwner } from '../util/user-util.js';
+import { getMasterUser, isUserMaster, isUserOwner } from '../util/user-util.js';
 import { PRODUCTS_SELECT_MASTER, PRODUCTS_SELECT_OWNER, PRODUCTS_SELECT_USER } from './products-select.js';
 
 export const createProduct = async (body, user) => {
@@ -17,8 +18,8 @@ export const createProduct = async (body, user) => {
     const id = user.id;
     const { name, description, price, stock, tags, images } = body;
 
-    const tagsOption = checkProductTagList(tags);
-    const imagesOption = checkImageList(images);
+    const tagsOption = await checkProductTagList(tags);
+    const imagesOption = await checkImageList(images);
 
     const createdProduct = await prisma.product.create({
       data: {
@@ -186,16 +187,108 @@ export const activateProduct = async (param) => {
   }
 };
 
-export const deleteProduct = async (param) => {
+export const deleteProduct = async (param, master) => {
   try {
     const { id } = param;
     const existProduct = await getExistProduct({ id });
+
+    const masterUser = await getMasterUser(master);
+
+    await comparePassword(password, masterUser.password);
 
     const results = await runDeleteProductTransaction(existProduct.id);
 
     const deletedProduct = results.pop();
 
     return deletedProduct;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const likeProduct = async (param, user) => {
+  try {
+    const { id } = param;
+
+    const existProduct = await getExistProduct({ id });
+
+    const likedProduct = await toggleProductLike(existProduct.id, user.id);
+
+    return likedProduct;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const getProductCommentList = async (param, query, user) => {
+  try {
+    const { id } = param;
+    const { skip, take, sort, keyword, isLiked } = query;
+
+    const existProduct = await getExistProduct({ id });
+
+    const orderBy = toOrderBy(sort);
+
+    const keywordFilter = keyword
+      ? {
+          productId: existProduct.id,
+          OR: [{ comment: { contains: keyword, mode: PRISMA_OPTION.INSENSITIVE } }],
+        }
+      : {};
+
+    const isLikedFilter = isLiked
+      ? {
+          likes: {
+            some: {
+              userId: user.id,
+            },
+          },
+        }
+      : {};
+
+    const where = {
+      ...keywordFilter,
+      ...isLikedFilter,
+    };
+
+    const productCommentList = await prisma.productComment.findMany({
+      skip,
+      take,
+      orderBy,
+      where,
+    });
+
+    const totalCount = await prisma.productComment.count({ where });
+
+    return {
+      totalCount: totalCount,
+      data: productCommentList,
+    };
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const createProductComment = async (param, body, user) => {
+  try {
+    const { id } = param;
+    const { content } = body;
+
+    const existProduct = await getExistProduct({ id });
+
+    const createdProductComment = await prisma.productComment.create({
+      data: {
+        content,
+        user: {
+          connect: { id: user.id },
+        },
+        product: {
+          connect: { id: existProduct.id },
+        },
+      },
+    });
+
+    return createdProductComment;
   } catch (error) {
     throw error;
   }

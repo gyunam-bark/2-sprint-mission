@@ -10,6 +10,8 @@ import authRoute from './auth/auth-router.js';
 import usersRoute from './users/users-router.js';
 import imagesRoute from './images/images-router.js';
 import productsRoute from './products/products-router.js';
+import articlesRoute from './articles/articles-router.js';
+import commentsRoute from './comments/comments-router.js';
 
 const app = new Hono();
 
@@ -23,6 +25,8 @@ app.route('/auth', authRoute);
 app.route('/users', usersRoute);
 app.route('/images', imagesRoute);
 app.route('/products', productsRoute);
+app.route('/articles', articlesRoute);
+app.route('/comments', commentsRoute);
 
 // 404 NOT FOUND HANDLER
 app.notFound(notFoundHandler);

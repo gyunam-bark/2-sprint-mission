@@ -6,7 +6,6 @@ import { deleteImageSchema, validate } from '../middleware/validate-middleware.j
 
 const images = new Hono();
 
-// 이미지 업로드
 images.post('/', allow([USER_ROLE.USER]), handleUploadImage);
 images.delete('/:id', allow([USER_ROLE.MASTER]), validate(deleteImageSchema), handleDeleteImage);
 

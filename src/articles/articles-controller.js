@@ -1,28 +1,28 @@
 import { getUser } from '../util/user-util.js';
 import { getValidate } from '../util/validate-util.js';
 import {
-  activateProduct,
-  createProduct,
-  createProductComment,
-  deactivateProduct,
-  deleteProduct,
-  getProductCommentList,
-  getProductDetail,
-  getProductList,
-  likeProduct,
-  updateProduct,
-} from './products-service.js';
+  activateArticle,
+  createArticle,
+  createArticleComment,
+  deactivateArticle,
+  deleteArticle,
+  getArticleCommentList,
+  getArticleDetail,
+  getArticleList,
+  likeArticle,
+  updateArticle,
+} from './articles-service.js';
 
-export const handleCreateProduct = async (c) => {
+export const handleCreateArticle = async (c) => {
   try {
     const { body } = await getValidate(c);
     const user = await getUser(c);
 
-    const createdProduct = await createProduct(body, user);
+    const createdArticle = await createArticle(body, user);
 
     const response = {
       success: true,
-      data: createdProduct,
+      data: createdArticle,
     };
 
     return c.json(response, 200);
@@ -31,16 +31,16 @@ export const handleCreateProduct = async (c) => {
   }
 };
 
-export const handleGetProductList = async (c) => {
+export const handleGetArticleList = async (c) => {
   try {
     const { query } = await getValidate(c);
     const user = await getUser(c);
 
-    const gotProductList = await getProductList(query, user);
+    const gotArticleList = await getArticleList(query, user);
 
     const response = {
       success: true,
-      data: gotProductList,
+      data: gotArticleList,
     };
 
     return c.json(response, 200);
@@ -49,16 +49,16 @@ export const handleGetProductList = async (c) => {
   }
 };
 
-export const handleGetProductDetail = async (c) => {
+export const handleGetArticleDetail = async (c) => {
   try {
     const { param } = await getValidate(c);
     const user = await getUser(c);
 
-    const gotProductDetail = await getProductDetail(param, user);
+    const gotArticleDetail = await getArticleDetail(param, user);
 
     const response = {
       success: true,
-      data: gotProductDetail,
+      data: gotArticleDetail,
     };
 
     return c.json(response, 200);
@@ -67,16 +67,16 @@ export const handleGetProductDetail = async (c) => {
   }
 };
 
-export const handleUpdateProduct = async (c) => {
+export const handleUpdateArticle = async (c) => {
   try {
     const { param, body } = await getValidate(c);
     const user = await getUser(c);
 
-    const updatedProduct = await updateProduct(param, body, user);
+    const updatedArticle = await updateArticle(param, body, user);
 
     const response = {
       success: true,
-      data: updatedProduct,
+      data: updatedArticle,
     };
 
     return c.json(response, 200);
@@ -85,16 +85,16 @@ export const handleUpdateProduct = async (c) => {
   }
 };
 
-export const handleDeactivateProduct = async (c) => {
+export const handleDeactivateArticle = async (c) => {
   try {
     const { param } = await getValidate(c);
     const user = await getUser(c);
 
-    const deactivatedProduct = await deactivateProduct(param, user);
+    const deactivatedArticle = await deactivateArticle(param, user);
 
     const response = {
       success: true,
-      data: deactivatedProduct,
+      data: deactivatedArticle,
     };
 
     return c.json(response, 200);
@@ -103,15 +103,16 @@ export const handleDeactivateProduct = async (c) => {
   }
 };
 
-export const handleActivateProduct = async (c) => {
+export const handleActivateArticle = async (c) => {
   try {
     const { param } = await getValidate(c);
+    const user = await getUser(c);
 
-    const activatedProduct = await activateProduct(param);
+    const activatedArticle = await activateArticle(param, user);
 
     const response = {
       success: true,
-      data: activatedProduct,
+      data: activatedArticle,
     };
 
     return c.json(response, 200);
@@ -120,16 +121,52 @@ export const handleActivateProduct = async (c) => {
   }
 };
 
-export const handleDeleteProduct = async (c) => {
+export const handleDeleteArticle = async (c) => {
+  try {
+    const { param } = await getValidate(c);
+    const user = await getUser(c);
+
+    const deletedArticle = await deleteArticle(param, user);
+
+    const response = {
+      success: true,
+      data: deletedArticle,
+    };
+
+    return c.json(response, 200);
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const handleLikeArticle = async (c) => {
+  try {
+    const { param } = await getValidate(c);
+    const user = await getUser(c);
+
+    const likedArticle = await likeArticle(param, user);
+
+    const response = {
+      success: true,
+      data: likedArticle,
+    };
+
+    return c.json(response, 200);
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const handleGetArticleCommentList = async (c) => {
   try {
     const { param, body } = await getValidate(c);
     const user = await getUser(c);
 
-    const deletedProduct = await deleteProduct(param, user);
+    const getAritlceCommentList = await getArticleCommentList(param, body, user);
 
     const response = {
       success: true,
-      data: deletedProduct,
+      data: getAritlceCommentList,
     };
 
     return c.json(response, 200);
@@ -138,52 +175,16 @@ export const handleDeleteProduct = async (c) => {
   }
 };
 
-export const handleLikeProduct = async (c) => {
-  try {
-    const { param } = await getValidate(c);
-    const user = await getUser(c);
-
-    const likedProduct = await likeProduct(param, user);
-
-    const response = {
-      success: true,
-      data: likedProduct,
-    };
-
-    return c.json(response, 200);
-  } catch (error) {
-    throw error;
-  }
-};
-
-export const handleGetCommentList = async (c) => {
-  try {
-    const { param, query } = await getValidate(c);
-    const user = await getUser(c);
-
-    const gotProductCommentList = await getProductCommentList(param, query, user);
-
-    const response = {
-      success: true,
-      data: gotProductCommentList,
-    };
-
-    return c.json(response, 200);
-  } catch (error) {
-    throw error;
-  }
-};
-
-export const handleCreateProductComment = async (c) => {
+export const handleCreateArticleComment = async (c) => {
   try {
     const { param, body } = await getValidate(c);
     const user = await getUser(c);
 
-    const createdProductComment = await createProductComment(param, body, user);
+    const createdAritcleComment = await createArticleComment(param, body, user);
 
     const response = {
       success: true,
-      data: createdProductComment,
+      data: createdAritcleComment,
     };
 
     return c.json(response, 200);

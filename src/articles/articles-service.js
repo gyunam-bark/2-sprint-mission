@@ -1,0 +1,295 @@
+import { COMMON_STATUS, PRISMA_OPTION } from '../constant/constant.js';
+import prisma from '../prisma/prisma.js';
+import {
+  runActivateArticleTransaction,
+  runDectivateArticleTransaction,
+  runDeleteArticleTransaction,
+} from '../prisma/transaction.js';
+import { checkArticleTagList, getExistArticle, toggleArticleLike } from '../util/article-util.js';
+import { checkImageList } from '../util/image-util.js';
+import { toOrderBy } from '../util/to-util.js';
+import { isUserMaster, isUserOwner } from '../util/user-util.js';
+import { ARTICLES_SELECT_MASTER, ARTICLES_SELECT_OWNER, ARTICLES_SELECT_USER } from './articles-select.js';
+
+export const createArticle = async (body, user) => {
+  try {
+    const id = user.id;
+    const { title, content, tags, images } = body;
+
+    const tagsOption = await checkArticleTagList(tags);
+    const imagesOption = await checkImageList(images);
+
+    const createdArticle = await prisma.article.create({
+      data: {
+        title,
+        content,
+        user: {
+          connect: { id },
+        },
+        tags: tagsOption,
+        images: imagesOption,
+      },
+    });
+
+    return createdArticle;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const getArticleList = async (query, user) => {
+  try {
+    const id = user.id;
+    const { skip, take, sort, keyword, isLiked } = query;
+
+    const orderBy = toOrderBy(sort);
+
+    const keywordFilter = keyword
+      ? {
+          userId: id,
+          OR: [
+            { title: { contains: keyword, mode: PRISMA_OPTION.INSENSITIVE } },
+            { content: { contains: keyword, mode: PRISMA_OPTION.INSENSITIVE } },
+          ],
+        }
+      : {};
+
+    const isLikedFilter = isLiked
+      ? {
+          likes: {
+            some: {
+              userId: id,
+            },
+          },
+        }
+      : {};
+
+    const where = {
+      ...keywordFilter,
+      ...isLikedFilter,
+    };
+
+    const articleList = await prisma.article.findMany({
+      skip,
+      take,
+      orderBy,
+      where,
+    });
+
+    const totalCount = await prisma.article.count({ where });
+
+    return {
+      totalCount: totalCount,
+      data: articleList,
+    };
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const getArticleDetail = async (param, user) => {
+  try {
+    const { id } = param;
+
+    const existArticle = await getExistArticle({ id });
+
+    if (existArticle.status === COMMON_STATUS.INACTIVE) {
+      throw new HttpError(400, '존재하지 않는 게시글입니다.');
+    }
+
+    const queryOptions = {
+      where: { id },
+    };
+
+    if (isUserMaster(user)) {
+      queryOptions.select = ARTICLES_SELECT_MASTER;
+    } else if (isUserOwner(user.id, existArticle.id)) {
+      queryOptions.select = ARTICLES_SELECT_OWNER;
+    } else {
+      queryOptions.select = ARTICLES_SELECT_USER;
+    }
+
+    const articleDetail = await prisma.article.findUnique(queryOptions);
+
+    return articleDetail;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const updateArticle = async (param, body, user) => {
+  try {
+    const { id } = param;
+    const { title, content, tags, images } = body;
+
+    const existArticle = await getExistArticle({ id });
+
+    const tagsOption = await checkArticleTagList(tags);
+    const imagesOption = await checkImageList(images);
+
+    if (!isUserMaster(user) && !isUserOwner(user.id, existArticle.id)) {
+      throw new HttpError(400, '권한이 없습니다.');
+    }
+
+    const updatedArticle = await prisma.article.update({
+      where: { id: existProduct.id },
+      data: {
+        title,
+        content,
+        tags: tagsOption,
+        images: imagesOption,
+      },
+    });
+
+    return updatedArticle;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const deactivateArticle = async (param, user) => {
+  try {
+    const { id } = param;
+
+    const existArticle = await getExistArticle({ id });
+
+    if (!isUserMaster(user) && !isUserOwner(user.id, existArticle.id)) {
+      throw new HttpError(400, '권한이 없습니다.');
+    }
+
+    const results = await runDectivateArticleTransaction(existArticle.id);
+
+    const deactivatedArticle = results.pop();
+
+    return deactivatedArticle;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const activateArticle = async (param) => {
+  try {
+    const { id } = param;
+
+    const existArticle = await getExistArticle({ id });
+
+    if (!isUserMaster(user) && !isUserOwner(user.id, existArticle.id)) {
+      throw new HttpError(400, '권한이 없습니다.');
+    }
+
+    const results = await runActivateArticleTransaction(existArticle.id);
+
+    const activatedArticle = results.pop();
+
+    return activatedArticle;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const deleteArticle = async (param, master) => {
+  try {
+    const { id } = param;
+    const existArticle = await getExistArticle({ id });
+
+    const masterUser = await getMasterUser(master);
+
+    await comparePassword(password, masterUser.password);
+
+    const results = await runDeleteArticleTransaction(existArticle.id);
+
+    const deletedArticle = results.pop();
+
+    return deletedArticle;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const likeArticle = async (param, user) => {
+  try {
+    const { id } = param;
+
+    const existArticle = await getExistArticle({ id });
+
+    const likedArticle = await toggleArticleLike(existArticle.id, user.id);
+
+    return likedArticle;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const getArticleCommentList = async (param, query, user) => {
+  try {
+    const { id } = param;
+    const { skip, take, sort, keyword, isLiked } = query;
+
+    const existArticle = await getExistArticle({ id });
+
+    const orderBy = toOrderBy(sort);
+
+    const keywordFilter = keyword
+      ? {
+          articleId: existArticle.id,
+          OR: [{ comment: { contains: keyword, mode: PRISMA_OPTION.INSENSITIVE } }],
+        }
+      : {};
+
+    const isLikedFilter = isLiked
+      ? {
+          likes: {
+            some: {
+              userId: user.id,
+            },
+          },
+        }
+      : {};
+
+    const where = {
+      ...keywordFilter,
+      ...isLikedFilter,
+    };
+
+    const articleCommentList = await prisma.articleComment.findMany({
+      skip,
+      take,
+      orderBy,
+      where,
+    });
+
+    const totalCount = await prisma.articleComment.count({ where });
+
+    return {
+      totalCount: totalCount,
+      data: articleCommentList,
+    };
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const createArticleComment = async (param, body, user) => {
+  try {
+    const { id } = param;
+    const { content } = body;
+
+    const existArticle = await getExistArticle({ id });
+
+    const createdArticleComment = await prisma.articleComment.create({
+      data: {
+        content,
+        user: {
+          connect: { id: user.id },
+        },
+        article: {
+          connect: { id: existArticle.id },
+        },
+      },
+    });
+
+    return createdArticleComment;
+  } catch (error) {
+    throw error;
+  }
+};
