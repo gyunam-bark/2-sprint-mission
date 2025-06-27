@@ -24,7 +24,6 @@ export const USERS_SELECT_MASTER = {
 };
 
 export const USERS_SELECT_OWNER = {
-  id: true,
   nickname: true,
   email: true,
   password: true,

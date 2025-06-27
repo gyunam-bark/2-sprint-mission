@@ -30,3 +30,9 @@ export const USER_STATUS = {
   INACTIVE: 'inactive', // 비활성화
   LOCK: 'lock', // 잠김
 };
+
+export const PRODUCT_STATUS = {
+  ACTIVE: 'active', // 활성화
+  INACTIVE: 'inactive', // 비활성화
+  SOLD_OUT: 'sold_out', // 품절
+};

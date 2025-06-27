@@ -1,10 +1,11 @@
-import { getParamFromContext } from '../util/from-util.js';
 import { getUser } from '../util/user-util.js';
 import { getValidate } from '../util/validate-util.js';
 import {
   activateUser,
   deactivateUser,
   deleteUser,
+  getArticleList,
+  getProductList,
   getUserDetail,
   getUserList,
   unlock,
@@ -68,8 +69,9 @@ export const handleDeleteUser = async (c) => {
 export const handleDeactivateUser = async (c) => {
   try {
     const { param } = await getValidate(c);
+    const user = getUser(c);
 
-    const deactivatedUser = await deactivateUser(param);
+    const deactivatedUser = await deactivateUser(param, user);
 
     const response = {
       success: true,
@@ -85,8 +87,9 @@ export const handleDeactivateUser = async (c) => {
 export const handleActivateUser = async (c) => {
   try {
     const { param } = await getValidate(c);
+    const user = getUser(c);
 
-    const activatedUser = await activateUser(param);
+    const activatedUser = await activateUser(param, user);
 
     const response = {
       success: true,
@@ -124,6 +127,40 @@ export const handleGetUserList = async (c) => {
     const response = {
       success: true,
       data: gotUserList,
+    };
+
+    return c.json(response, 200);
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const handleGetProductList = async (c) => {
+  try {
+    const { param, query } = await getValidate(c);
+
+    const gotProductList = await getProductList(param, query);
+
+    const response = {
+      success: true,
+      data: gotProductList,
+    };
+
+    return c.json(response, 200);
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const handleGetArticleList = async (c) => {
+  try {
+    const { param, query } = await getValidate(c);
+
+    const gotArticleList = await getArticleList(param, query);
+
+    const response = {
+      success: true,
+      data: gotArticleList,
     };
 
     return c.json(response, 200);

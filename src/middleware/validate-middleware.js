@@ -88,6 +88,100 @@ export const deleteImageSchema = {
 };
 
 // ===========================================
+// = PRODUCTS
+// ===========================================
+export const createProductSchema = {
+  body: Joi.object({
+    name: Joi.string().min(1).required(),
+    description: Joi.string().min(1).required(),
+    price: Joi.number().min(1).required(),
+    stock: Joi.number().min(0).optional(),
+    tags: Joi.array().items(Joi.string().uuid()).min(0).optional(),
+    images: Joi.array().items(Joi.string().uuid()).min(0).optional(),
+  }),
+};
+export const getProductListSchema = {
+  param: Joi.object({
+    id: Joi.string().uuid().optional(),
+  }),
+  query: Joi.object({
+    skip: Joi.number().min(0).optional(),
+    take: Joi.number().min(0).optional(),
+    sort: Joi.string().valid(COMMON_SORT.LATEST, COMMON_SORT.OLDEST).optional(),
+    keyword: Joi.string().optional(),
+    isLiked: Joi.bool().optional(),
+  }),
+};
+export const getProductDetailSchema = {
+  param: Joi.object({
+    id: Joi.string().uuid().required(),
+  }),
+};
+export const updateProductSchema = {
+  param: Joi.object({
+    id: Joi.string().uuid().required(),
+  }),
+  body: Joi.object({
+    name: Joi.string().min(1).optional(),
+    description: Joi.string().min(1).optional(),
+    price: Joi.number().min(1).optional(),
+    stock: Joi.number().min(0).optional(),
+    tags: Joi.array().items(Joi.string().uuid()).min(0).optional(),
+    images: Joi.array().items(Joi.string().uuid()).min(0).optional(),
+  }),
+};
+export const deactivateProductSchema = {
+  param: Joi.object({
+    id: Joi.string().uuid().required(),
+  }),
+};
+export const activateProductSchema = {
+  param: Joi.object({
+    id: Joi.string().uuid().required(),
+  }),
+};
+export const deleteProductSchema = {
+  param: Joi.object({
+    id: Joi.string().uuid().required(),
+  }),
+  body: Joi.object({
+    password: Joi.string().min(8).optional(),
+  }),
+};
+
+// ===========================================
+// = PRODUCT COMMENTS
+// ===========================================
+export const getProductCommentListSchema = {
+  param: Joi.object({
+    id: Joi.string().uuid().optional(),
+  }),
+  query: Joi.object({
+    skip: Joi.number().min(0).optional(),
+    take: Joi.number().min(0).optional(),
+    sort: Joi.string().valid(COMMON_SORT.LATEST, COMMON_SORT.OLDEST).optional(),
+    keyword: Joi.string().optional(),
+    isLiked: Joi.bool().optional(),
+  }),
+};
+
+// ===========================================
+// = ARTICLES
+// ===========================================
+export const getArticleListSchema = {
+  param: Joi.object({
+    id: Joi.string().uuid().optional(),
+  }),
+  query: Joi.object({
+    skip: Joi.number().min(0).optional(),
+    take: Joi.number().min(0).optional(),
+    sort: Joi.string().valid(COMMON_SORT.LATEST, COMMON_SORT.OLDEST).optional(),
+    keyword: Joi.string().optional(),
+    isLiked: Joi.bool().optional(),
+  }),
+};
+
+// ===========================================
 // = MIDDLEWARE
 // ===========================================
 export const validate = (schema) => {

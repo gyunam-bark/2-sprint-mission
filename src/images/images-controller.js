@@ -45,8 +45,8 @@ export const handleDeleteImage = async (c) => {
 
     const deletedImage = await deleteImage(id);
 
-    if (deletedImage.path) {
-      const filePath = path.resolve(rootPath, deletedImage.path);
+    if (deletedImage.url) {
+      const filePath = path.resolve(rootPath, deletedImage.url);
 
       await fs.unlink(filePath);
     }

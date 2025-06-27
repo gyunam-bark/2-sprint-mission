@@ -61,7 +61,7 @@ model Product {
   userId      String
   name        String
   description String
-  price       Int
+  price       Int                @default(1)
   stock       Int                @default(1)
   tags        ProductTag[]       @relation("ProductTags")
   status      ProductStatus      @default(active)
@@ -70,7 +70,7 @@ model Product {
   deletedAt   DateTime?
   images      ProductImageLink[]
   comments    ProductComment[]
-  likes      ProductLike[]
+  likes       ProductLike[]
 }
 
 model ProductComment {
@@ -78,7 +78,7 @@ model ProductComment {
   content   String
   user      User         @relation(fields: [userId], references: [id])
   userId    String
-  product   Product      @relation(fields: [productId], references: [id], onDelete: Cascade)
+  product   Product      @relation(fields: [productId], references: [id])
   productId String
   status    CommonStatus @default(active)
   createdAt DateTime     @default(now())
@@ -108,7 +108,7 @@ model ArticleComment {
   content   String
   user      User         @relation(fields: [userId], references: [id])
   userId    String
-  article   Article      @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  article   Article      @relation(fields: [articleId], references: [id])
   articleId String
   status    CommonStatus @default(active)
   createdAt DateTime     @default(now())
@@ -191,10 +191,10 @@ model CommentLike {
   user              User             @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId            String
 
-  productComment    ProductComment? @relation(fields: [productCommentId], references: [id], onDelete: Cascade)
+  productComment    ProductComment?  @relation(fields: [productCommentId], references: [id], onDelete: Cascade)
   productCommentId  String?
 
-  articleComment    ArticleComment? @relation(fields: [articleCommentId], references: [id], onDelete: Cascade)
+  articleComment    ArticleComment?  @relation(fields: [articleCommentId], references: [id], onDelete: Cascade)
   articleCommentId  String?
 
   createdAt         DateTime         @default(now())

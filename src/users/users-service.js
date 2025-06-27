@@ -7,6 +7,7 @@ import {
 } from '../prisma/transaction.js';
 import { comparePassword } from '../util/crypt-util.js';
 import { HttpError } from '../util/error-util.js';
+import { toOrderBy } from '../util/to-util.js';
 import {
   checkExistUserWithEmail,
   getArchivedUser,
@@ -35,9 +36,9 @@ export const getUserDetail = async (param, user) => {
       queryOptions.select = USERS_SELECT_USER;
     }
 
-    const detailedUser = await prisma.user.findUnique(queryOptions);
+    const userDetail = await prisma.user.findUnique(queryOptions);
 
-    return detailedUser;
+    return userDetail;
   } catch (error) {
     throw error;
   }
@@ -74,11 +75,15 @@ export const updateUser = async (param, body, user) => {
   }
 };
 
-export const deactivateUser = async (param) => {
+export const deactivateUser = async (param, user) => {
   try {
     const { id } = param;
 
     const existUser = await getExistUser({ id });
+
+    if (!isUserMaster(user) && !isUserOwner(user.id, existUser.id)) {
+      throw new HttpError(400, '권한이 없습니다.');
+    }
 
     const results = await runDeactivateUserTransaction(existUser.id);
 
@@ -90,11 +95,15 @@ export const deactivateUser = async (param) => {
   }
 };
 
-export const activateUser = async (param) => {
+export const activateUser = async (param, user) => {
   try {
     const { id } = param;
 
     const existUser = await getExistUser({ id });
+
+    if (!isUserMaster(user)) {
+      throw new HttpError(400, '권한이 없습니다.');
+    }
 
     const results = await runActivateUserTransaction(existUser.id);
 
@@ -117,9 +126,7 @@ export const deleteUser = async (param, body, master) => {
 
     await comparePassword(password, masterUser.password);
 
-    const anonymousUser = await getArchivedUser();
-
-    const results = await runDeleteUserTransaction(existUser.id, anonymousUser.id);
+    const results = await runDeleteUserTransaction(existUser.id);
 
     const deletedUser = results.pop();
 
@@ -165,13 +172,7 @@ export const getUserList = async (query) => {
       ...keywordFilter,
     };
 
-    const prismaOrderBy = sort === COMMON_SORT.LATEST ? PRISMA_OPTION.ORDER_BY_DESCEND : PRISMA_OPTION.ORDER_BY_ASCEND;
-
-    const orderBy = sort
-      ? {
-          createdAt: prismaOrderBy,
-        }
-      : {};
+    const orderBy = toOrderBy(sort);
 
     const userList = await prisma.user.findMany({
       skip,
@@ -179,11 +180,112 @@ export const getUserList = async (query) => {
       orderBy,
       where,
     });
+
     const totalCount = await prisma.user.count({ where });
 
     return {
       totalCount: totalCount,
-      list: userList,
+      data: userList,
+    };
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const getProductList = async (param, query) => {
+  try {
+    const { id } = param;
+    const { skip, take, sort, keyword, isLiked } = query;
+
+    const orderBy = toOrderBy(sort);
+
+    const keywordFilter = keyword
+      ? {
+          userId: id,
+          OR: [
+            { name: { contains: keyword, mode: PRISMA_OPTION.INSENSITIVE } },
+            { description: { contains: keyword, mode: PRISMA_OPTION.INSENSITIVE } },
+          ],
+        }
+      : {};
+
+    const isLikedFilter = isLiked
+      ? {
+          likes: {
+            some: {
+              userId: id,
+            },
+          },
+        }
+      : {};
+
+    const where = {
+      ...keywordFilter,
+      ...isLikedFilter,
+    };
+
+    const productList = await prisma.product.findMany({
+      skip,
+      take,
+      orderBy,
+      where,
+    });
+
+    const totalCount = await prisma.product.count({ where });
+
+    return {
+      totalCount: totalCount,
+      data: productList,
+    };
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const getArticleList = async (param, query) => {
+  try {
+    const { id } = param;
+    const { skip, take, sort, keyword, isLiked } = query;
+
+    const orderBy = toOrderBy(sort);
+
+    const keywordFilter = keyword
+      ? {
+          userId: id,
+          OR: [
+            { title: { contains: keyword, mode: PRISMA_OPTION.INSENSITIVE } },
+            { content: { contains: keyword, mode: PRISMA_OPTION.INSENSITIVE } },
+          ],
+        }
+      : {};
+
+    const isLikedFilter = isLiked
+      ? {
+          likes: {
+            some: {
+              userId: id,
+            },
+          },
+        }
+      : {};
+
+    const where = {
+      ...keywordFilter,
+      ...isLikedFilter,
+    };
+
+    const articleList = await prisma.article.findMany({
+      skip,
+      take,
+      orderBy,
+      where,
+    });
+
+    const totalCount = await prisma.article.count({ where });
+
+    return {
+      totalCount: totalCount,
+      data: articleList,
     };
   } catch (error) {
     throw error;
