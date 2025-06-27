@@ -42,9 +42,9 @@ export const handleUpdateUser = async (c) => {
 
 export const handleDeleteUser = async (c) => {
   const { param, body } = await getValidate(c);
-  const master = await getUser(c);
+  const user = await getUser(c);
 
-  const deletedUser = await deleteUser(param, body, master);
+  const deletedUser = await deleteUser(param, body, user);
 
   const response = {
     success: true,

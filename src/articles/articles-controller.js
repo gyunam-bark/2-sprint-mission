@@ -99,9 +99,8 @@ export const handleActivateArticle = async (c) => {
 
 export const handleDeleteArticle = async (c) => {
   const { param, body } = await getValidate(c);
-  const user = await getUser(c);
 
-  const deletedArticle = await deleteArticle(param, body, user);
+  const deletedArticle = await deleteArticle(param, body);
 
   const response = {
     success: true,

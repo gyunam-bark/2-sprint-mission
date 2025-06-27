@@ -63,6 +63,14 @@ export const getProductList = async (query, user) => {
       }
     : {};
 
+  const include = {
+    likes: {
+      where: {
+        userId: id,
+      },
+    },
+  };
+
   const where = {
     ...keywordFilter,
     ...isLikedFilter,
@@ -73,13 +81,19 @@ export const getProductList = async (query, user) => {
     take,
     orderBy,
     where,
+    include,
   });
+
+  const productListAddIsLiked = productList.map(({ likes, ...rest }) => ({
+    ...rest,
+    isLiked: likes.length > 0,
+  }));
 
   const totalCount = await prisma.product.count({ where });
 
   return {
     totalCount: totalCount,
-    data: productList,
+    data: productListAddIsLiked,
   };
 };
 
@@ -169,9 +183,7 @@ export const deleteProduct = async (param, body, master) => {
 
   const existProduct = await getExistProduct({ id });
 
-  const masterUser = await getMasterUser(master);
-
-  await comparePassword(password, masterUser.password);
+  await comparePassword(password, master.password);
 
   const results = await runDeleteProductTransaction(existProduct.id);
 
@@ -220,18 +232,32 @@ export const getProductCommentList = async (param, query, user) => {
     ...isLikedFilter,
   };
 
+  const include = {
+    likes: {
+      where: {
+        userId: id,
+      },
+    },
+  };
+
   const productCommentList = await prisma.productComment.findMany({
     skip,
     take,
     orderBy,
     where,
+    include,
   });
+
+  const productCommentListAddIsLiked = productCommentList.map(({ likes, ...rest }) => ({
+    ...rest,
+    isLiked: likes.length > 0,
+  }));
 
   const totalCount = await prisma.productComment.count({ where });
 
   return {
     totalCount: totalCount,
-    data: productCommentList,
+    data: productCommentListAddIsLiked,
   };
 };
 

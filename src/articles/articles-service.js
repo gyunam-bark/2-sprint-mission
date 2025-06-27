@@ -65,18 +65,32 @@ export const getArticleList = async (query, user) => {
     ...isLikedFilter,
   };
 
+  const include = {
+    likes: {
+      where: {
+        userId: id,
+      },
+    },
+  };
+
   const articleList = await prisma.article.findMany({
     skip,
     take,
     orderBy,
     where,
+    include,
   });
+
+  const articleListAddIsLiked = articleList.map(({ likes, ...rest }) => ({
+    ...rest,
+    isLiked: likes.length > 0,
+  }));
 
   const totalCount = await prisma.article.count({ where });
 
   return {
     totalCount: totalCount,
-    data: articleList,
+    data: articleListAddIsLiked,
   };
 };
 
@@ -170,9 +184,7 @@ export const deleteArticle = async (param, body, master) => {
 
   const existArticle = await getExistArticle({ id });
 
-  const masterUser = await getMasterUser(master);
-
-  await comparePassword(password, masterUser.password);
+  await comparePassword(password, master.password);
 
   const results = await runDeleteArticleTransaction(existArticle.id);
 
@@ -221,18 +233,32 @@ export const getArticleCommentList = async (param, query, user) => {
     ...isLikedFilter,
   };
 
+  const include = {
+    likes: {
+      where: {
+        userId: id,
+      },
+    },
+  };
+
   const articleCommentList = await prisma.articleComment.findMany({
     skip,
     take,
     orderBy,
     where,
+    include,
   });
+
+  const articleCommentListAddIsLiked = articleCommentList.map(({ likes, ...rest }) => ({
+    ...rest,
+    isLiked: likes.length > 0,
+  }));
 
   const totalCount = await prisma.articleComment.count({ where });
 
   return {
     totalCount: totalCount,
-    data: articleCommentList,
+    data: articleCommentListAddIsLiked,
   };
 };
 

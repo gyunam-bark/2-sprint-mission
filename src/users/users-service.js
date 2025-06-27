@@ -105,9 +105,7 @@ export const deleteUser = async (param, body, master) => {
 
   const existUser = await getExistUser({ id });
 
-  const masterUser = await getMasterUser(master);
-
-  await comparePassword(password, masterUser.password);
+  await comparePassword(password, master.password);
 
   const results = await runDeleteUserTransaction(existUser.id);
 

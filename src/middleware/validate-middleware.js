@@ -328,6 +328,26 @@ export const likeArticleCommentSchema = {
 };
 
 // ===========================================
+// = LOGS
+// ===========================================
+export const getLogListSchema = {
+  query: Joi.object({
+    skip: Joi.number().min(0).optional(),
+    take: Joi.number().min(0).optional(),
+    sort: Joi.string().valid(COMMON_SORT.LATEST, COMMON_SORT.OLDEST).optional(),
+    keyword: Joi.string().optional(),
+  }),
+};
+export const deleteLogSchema = {
+  param: Joi.object({
+    id: Joi.string().uuid().required(),
+  }),
+  body: Joi.object({
+    password: Joi.string().min(8).optional(),
+  }),
+};
+
+// ===========================================
 // = MIDDLEWARE
 // ===========================================
 export const validate = (schema) => {
