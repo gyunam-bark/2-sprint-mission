@@ -2,13 +2,13 @@ import jwt from 'jsonwebtoken';
 import ENV from '../config/env.js';
 import { deleteCookie, getCookie, setCookie } from 'hono/cookie';
 import { Payload } from '../auth/auth-model.js';
-import { HttpError } from './error-util.js';
+import { UnauthorizedError } from './error-util.js';
 import { AUTH_STRINGS } from '../auth/auth-constant.js';
 
 // ACCESS_TOKEN 생성
 export const generateAccessToken = (payload) => {
   if (!payload instanceof Payload) {
-    throw HttpError(500);
+    throw new UnauthorizedError();
   }
 
   const expiresIn = ENV.ACCESS_EXPIRY_VALUE + ENV.ACCESS_EXPIRY_UNIT;
@@ -18,7 +18,7 @@ export const generateAccessToken = (payload) => {
 // REFRESH_TOKEN 생성
 export const generateRefreshToken = (payload) => {
   if (!payload instanceof Payload) {
-    throw HttpError(500);
+    throw new UnauthorizedError();
   }
 
   const expiresIn = ENV.REFRESH_EXPIRY_VALUE + ENV.REFRESH_EXPIRY_UNIT;

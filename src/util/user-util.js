@@ -1,6 +1,6 @@
 import { USER_ROLE, USER_STATUS } from '../constant/constant.js';
 import prisma from '../prisma/prisma.js';
-import { HttpError } from './error-util.js';
+import { ConflictError, ForbiddenError, LockedError, NotFoundError } from './error-util.js';
 
 const C_KEYWORD = 'user';
 
@@ -14,7 +14,7 @@ export const getExistUser = async (where) => {
     where,
   });
   if (!existUser) {
-    throw new HttpError(404, '사용자를 찾을 수 없습니다.');
+    throw new NotFoundError();
   }
   return existUser;
 };
@@ -24,7 +24,7 @@ export const checkExistUserWithEmail = async (email) => {
     where: { email },
   });
   if (existUser) {
-    throw new HttpError(409, '이미 해당 이메일로 가입된 사용자가 있습니다.');
+    throw new ConflictError();
   }
 };
 
@@ -33,7 +33,7 @@ export const getMasterUser = async (master) => {
     where: { id: master.id },
   });
   if (!masterUser) {
-    throw HttpError(404, '마스터 사용자를 찾을 수 없습니다.');
+    throw new NotFoundError();
   }
   return masterUser;
 };
@@ -43,19 +43,19 @@ export const getArchivedUser = async () => {
     where: { isArchiveUser: true },
   });
   if (!archiveUser) {
-    throw HttpError(404, '아카이브 유저를 찾을 수 없습니다.');
+    throw new NotFoundError();
   }
   return archiveUser;
 };
 
 export const checkUserLock = (user) => {
   if (user.status === USER_STATUS.LOCK) {
-    throw new HttpError(400, '계정이 잠겨있습니다.');
+    throw new LockedError();
   }
 };
 
 export const checkUserInactive = (user) => {
   if (user.status === USER_STATUS.INACTIVE) {
-    throw new HttpError(400, '접속할 수 없는 계정입니다.');
+    throw new ForbiddenError();
   }
 };

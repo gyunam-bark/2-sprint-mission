@@ -12,117 +12,94 @@ import {
 import { getUser } from '../util/user-util.js';
 import { getIpFromContext } from '../util/from-util.js';
 
-// 사용자 생성
 export const handleRegister = async (c) => {
-  try {
-    const { body } = await getValidate(c);
+  const { body } = await getValidate(c);
 
-    const registeredUser = await register(body);
+  const registeredUser = await register(body);
 
-    const registerResponse = new RegisterResponse(registeredUser);
+  const registerResponse = new RegisterResponse(registeredUser);
 
-    const response = {
-      success: true,
-      data: registerResponse.toJSON(),
-    };
+  const response = {
+    success: true,
+    data: registerResponse.toJSON(),
+  };
 
-    return c.json(response, 201);
-  } catch (error) {
-    throw error;
-  }
+  return c.json(response, 201);
 };
 
-// 사용자 탈퇴
 export const handleWithdraw = async (c) => {
-  try {
-    const { body } = await getValidate(c);
-    const user = await getUser(c);
+  const { body } = await getValidate(c);
+  const user = await getUser(c);
 
-    const accessToken = getAccessToken(c);
-    const refreshToken = getRefreshToken(c);
+  const accessToken = getAccessToken(c);
+  const refreshToken = getRefreshToken(c);
 
-    await logout(accessToken, refreshToken);
+  await logout(accessToken, refreshToken);
 
-    deleteAccessToken(c);
-    deleteRefreshToken(c);
+  deleteAccessToken(c);
+  deleteRefreshToken(c);
 
-    const withdrawedUser = await withdraw(user, body);
+  const withdrawedUser = await withdraw(user, body);
 
-    const withdrawResponse = new WithdrawResponse(withdrawedUser);
+  const withdrawResponse = new WithdrawResponse(withdrawedUser);
 
-    const response = {
-      success: true,
-      data: withdrawResponse.toJSON(),
-    };
+  const response = {
+    success: true,
+    data: withdrawResponse.toJSON(),
+  };
 
-    return c.json(response, 200);
-  } catch (error) {
-    throw error;
-  }
+  return c.json(response, 200);
 };
 
-// 로그인
 export const handleLogin = async (c) => {
-  try {
-    const { body } = await getValidate(c);
+  const { body } = await getValidate(c);
 
-    const ip = getIpFromContext(c);
+  const ip = getIpFromContext(c);
 
-    const { accessToken, refreshToken, cookieOptionAccess, cookieOptionRefresh } = await login(body, ip);
+  const { accessToken, refreshToken, cookieOptionAccess, cookieOptionRefresh } = await login(body, ip);
 
-    setAccessToken(c, accessToken, cookieOptionAccess);
-    setRefreshToken(c, refreshToken, cookieOptionRefresh);
+  setAccessToken(c, accessToken, cookieOptionAccess);
+  setRefreshToken(c, refreshToken, cookieOptionRefresh);
 
-    const loginResponse = new LoginResponse(accessToken);
+  const loginResponse = new LoginResponse(accessToken);
 
-    const response = {
-      success: true,
-      data: loginResponse.toJSON(),
-    };
+  const response = {
+    success: true,
+    data: loginResponse.toJSON(),
+  };
 
-    return c.json(response);
-  } catch (error) {
-    throw error;
-  }
+  return c.json(response);
 };
 
 export const handleLogout = async (c) => {
-  try {
-    const accessToken = getAccessToken(c);
-    const refreshToken = getRefreshToken(c);
+  const accessToken = getAccessToken(c);
+  const refreshToken = getRefreshToken(c);
 
-    await logout(accessToken, refreshToken);
+  await logout(accessToken, refreshToken);
 
-    deleteAccessToken(c);
-    deleteRefreshToken(c);
+  deleteAccessToken(c);
+  deleteRefreshToken(c);
 
-    const response = {
-      success: true,
-      data: '로그아웃 성공',
-    };
+  const response = {
+    success: true,
+    data: 'logout',
+  };
 
-    return c.json(response);
-  } catch (error) {
-    throw error;
-  }
+  return c.json(response);
 };
 
 export const handleRefresh = async (c) => {
-  try {
-    const currentRefreshToken = getRefreshToken(c);
+  const currentRefreshToken = getRefreshToken(c);
 
-    const { accessToken, refreshToken, cookieOptionAccess, cookieOptionRefresh } = await refresh(currentRefreshToken);
+  const { accessToken, refreshToken, cookieOptionAccess, cookieOptionRefresh } = await refresh(currentRefreshToken);
 
-    setAccessToken(c, accessToken, cookieOptionAccess);
-    setRefreshToken(c, refreshToken, cookieOptionRefresh);
+  setAccessToken(c, accessToken, cookieOptionAccess);
+  setRefreshToken(c, refreshToken, cookieOptionRefresh);
 
-    const refreshResponse = new RefreshResponse(accessToken);
+  const refreshResponse = new RefreshResponse(accessToken);
 
-    return c.json({
-      success: true,
-      data: refreshResponse.toJSON(),
-    });
-  } catch (error) {
-    throw error;
-  }
+  return c.json({
+    success: true,
+    data: refreshResponse.toJSON(),
+  });
 };

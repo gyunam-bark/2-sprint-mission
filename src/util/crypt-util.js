@@ -1,5 +1,5 @@
 import bcrypt from 'bcrypt';
-import { HttpError } from './error-util.js';
+import { UnauthorizedError } from './error-util.js';
 
 const SALT_OR_ROUND = 10;
 
@@ -11,7 +11,7 @@ export const comparePassword = async (raw, hashed, doWhenError) => {
   const isValidPassword = await bcrypt.compare(raw, hashed);
   if (!isValidPassword) {
     await doWhenError;
-    throw new HttpError(404, '비밀번호가 틀렸습니다.');
+    throw new UnauthorizedError();
   }
   return isValidPassword;
 };

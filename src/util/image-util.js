@@ -1,3 +1,5 @@
+import { NotFoundError } from './error-util.js';
+
 export const checkImageList = async (images) => {
   let imageOption = undefined;
   if (images) {
@@ -9,7 +11,7 @@ export const checkImageList = async (images) => {
     const invalidImageIdList = images.filter((id) => !foundImageIdList.includes(id));
 
     if (invalidImageIdList.length > 0) {
-      throw new HttpError(400, `유효하지 않은 이미지가 포함 되었습니다.`);
+      throw new NotFoundError();
     }
     imageOption = {
       connect: imageList.map((image) => ({ id: image.id })),

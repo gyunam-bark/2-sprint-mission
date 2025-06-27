@@ -1,12 +1,12 @@
 import prisma from '../prisma/prisma.js';
-import { HttpError } from './error-util.js';
+import { NotFoundError } from './error-util.js';
 
 export const getExistArticle = async (where) => {
   const existArticle = await prisma.article.findUnique({
     where,
   });
   if (!existArticle) {
-    throw new HttpError(404, '게시글을 찾을 수 없습니다.');
+    throw new NotFoundError();
   }
   return existArticle;
 };
@@ -22,7 +22,7 @@ export const checkArticleTagList = async (tags) => {
     const invalidTagIdList = tags.filter((id) => !foundTagIdList.includes(id));
 
     if (invalidTagIdList.length > 0) {
-      throw new HttpError(400, `유효하지 않은 태그가 입력되었습니다.`);
+      throw new NotFoundError();
     }
 
     tagsOption = {

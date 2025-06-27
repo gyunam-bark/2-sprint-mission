@@ -14,180 +14,140 @@ import {
 } from './products-service.js';
 
 export const handleCreateProduct = async (c) => {
-  try {
-    const { body } = await getValidate(c);
-    const user = await getUser(c);
+  const { body } = await getValidate(c);
+  const user = await getUser(c);
 
-    const createdProduct = await createProduct(body, user);
+  const createdProduct = await createProduct(body, user);
 
-    const response = {
-      success: true,
-      data: createdProduct,
-    };
+  const response = {
+    success: true,
+    data: createdProduct,
+  };
 
-    return c.json(response, 200);
-  } catch (error) {
-    throw error;
-  }
+  return c.json(response, 200);
 };
 
 export const handleGetProductList = async (c) => {
-  try {
-    const { query } = await getValidate(c);
-    const user = await getUser(c);
+  const { query } = await getValidate(c);
+  const user = await getUser(c);
 
-    const gotProductList = await getProductList(query, user);
+  const gotProductList = await getProductList(query, user);
 
-    const response = {
-      success: true,
-      data: gotProductList,
-    };
+  const response = {
+    success: true,
+    data: gotProductList,
+  };
 
-    return c.json(response, 200);
-  } catch (error) {
-    throw error;
-  }
+  return c.json(response, 200);
 };
 
 export const handleGetProductDetail = async (c) => {
-  try {
-    const { param } = await getValidate(c);
-    const user = await getUser(c);
+  const { param } = await getValidate(c);
+  const user = await getUser(c);
 
-    const gotProductDetail = await getProductDetail(param, user);
+  const gotProductDetail = await getProductDetail(param, user);
 
-    const response = {
-      success: true,
-      data: gotProductDetail,
-    };
+  const response = {
+    success: true,
+    data: gotProductDetail,
+  };
 
-    return c.json(response, 200);
-  } catch (error) {
-    throw error;
-  }
+  return c.json(response, 200);
 };
 
 export const handleUpdateProduct = async (c) => {
-  try {
-    const { param, body } = await getValidate(c);
-    const user = await getUser(c);
+  const { param, body } = await getValidate(c);
+  const user = await getUser(c);
 
-    const updatedProduct = await updateProduct(param, body, user);
+  const updatedProduct = await updateProduct(param, body, user);
 
-    const response = {
-      success: true,
-      data: updatedProduct,
-    };
+  const response = {
+    success: true,
+    data: updatedProduct,
+  };
 
-    return c.json(response, 200);
-  } catch (error) {
-    throw error;
-  }
+  return c.json(response, 200);
 };
 
 export const handleDeactivateProduct = async (c) => {
-  try {
-    const { param } = await getValidate(c);
-    const user = await getUser(c);
+  const { param } = await getValidate(c);
+  const user = await getUser(c);
 
-    const deactivatedProduct = await deactivateProduct(param, user);
+  const deactivatedProduct = await deactivateProduct(param, user);
 
-    const response = {
-      success: true,
-      data: deactivatedProduct,
-    };
+  const response = {
+    success: true,
+    data: deactivatedProduct,
+  };
 
-    return c.json(response, 200);
-  } catch (error) {
-    throw error;
-  }
+  return c.json(response, 200);
 };
 
 export const handleActivateProduct = async (c) => {
-  try {
-    const { param } = await getValidate(c);
+  const { param } = await getValidate(c);
 
-    const activatedProduct = await activateProduct(param);
+  const activatedProduct = await activateProduct(param);
 
-    const response = {
-      success: true,
-      data: activatedProduct,
-    };
+  const response = {
+    success: true,
+    data: activatedProduct,
+  };
 
-    return c.json(response, 200);
-  } catch (error) {
-    throw error;
-  }
+  return c.json(response, 200);
 };
 
 export const handleDeleteProduct = async (c) => {
-  try {
-    const { param, body } = await getValidate(c);
-    const user = await getUser(c);
+  const { param, body } = await getValidate(c);
+  const user = await getUser(c);
 
-    const deletedProduct = await deleteProduct(param, user);
+  const deletedProduct = await deleteProduct(param, body, user);
 
-    const response = {
-      success: true,
-      data: deletedProduct,
-    };
+  const response = {
+    success: true,
+    data: deletedProduct,
+  };
 
-    return c.json(response, 200);
-  } catch (error) {
-    throw error;
-  }
+  return c.json(response, 200);
 };
 
 export const handleLikeProduct = async (c) => {
-  try {
-    const { param } = await getValidate(c);
-    const user = await getUser(c);
+  const { param } = await getValidate(c);
+  const user = await getUser(c);
 
-    const likedProduct = await likeProduct(param, user);
+  const likedProduct = await likeProduct(param, user);
 
-    const response = {
-      success: true,
-      data: likedProduct,
-    };
+  const response = {
+    success: true,
+    data: likedProduct,
+  };
 
-    return c.json(response, 200);
-  } catch (error) {
-    throw error;
-  }
+  return c.json(response, 200);
 };
 
 export const handleGetCommentList = async (c) => {
-  try {
-    const { param, query } = await getValidate(c);
-    const user = await getUser(c);
+  const { param, query } = await getValidate(c);
+  const user = await getUser(c);
 
-    const gotProductCommentList = await getProductCommentList(param, query, user);
+  const gotProductCommentList = await getProductCommentList(param, query, user);
 
-    const response = {
-      success: true,
-      data: gotProductCommentList,
-    };
+  const response = {
+    success: true,
+    data: gotProductCommentList,
+  };
 
-    return c.json(response, 200);
-  } catch (error) {
-    throw error;
-  }
+  return c.json(response, 200);
 };
 
 export const handleCreateProductComment = async (c) => {
-  try {
-    const { param, body } = await getValidate(c);
-    const user = await getUser(c);
+  const { param, body } = await getValidate(c);
+  const user = await getUser(c);
 
-    const createdProductComment = await createProductComment(param, body, user);
+  const createdProductComment = await createProductComment(param, body, user);
 
-    const response = {
-      success: true,
-      data: createdProductComment,
-    };
+  const response = {
+    success: true,
+    data: createdProductComment,
+  };
 
-    return c.json(response, 200);
-  } catch (error) {
-    throw error;
-  }
+  return c.json(response, 200);
 };

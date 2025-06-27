@@ -8,6 +8,8 @@ export const getBodyFromContext = async (c) => await c.req.json();
 
 export const getParamFromContext = (c) => c.req.param();
 
+export const getMethodFromContext = (c) => c.req.method;
+
 export const getQueryFromContext = (c) => Object.fromEntries(new URL(c.req.url).searchParams.entries());
 
 export const getFormDataFromContext = async (c) => await c.req.formData();

@@ -1,5 +1,5 @@
 import prisma from '../prisma/prisma.js';
-import { HttpError } from './error-util.js';
+import { NotFoundError } from './error-util.js';
 
 export const getExistProductComment = async (where) => {
   const existProductComment = await prisma.productComment.findUnique({
@@ -9,7 +9,7 @@ export const getExistProductComment = async (where) => {
     },
   });
   if (!existProductComment) {
-    throw new HttpError(404, '게시글을 찾을 수 없습니다.');
+    throw new NotFoundError();
   }
   return existProductComment;
 };
@@ -19,7 +19,7 @@ export const getExistArticleComment = async (where) => {
     where,
   });
   if (!existArticleComment) {
-    throw new HttpError(404, '게시글을 찾을 수 없습니다.');
+    throw new NotFoundError();
   }
   return existArticleComment;
 };
