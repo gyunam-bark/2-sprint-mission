@@ -7,12 +7,14 @@
     "docker:up": "docker compose up -d",
     "docker:down": "docker compose down --volumes",
     "docker:clean": "docker compose down --volumes --rmi all --remove-orphans",
+
     "mikro:create": "npx mikro-orm migration:create",
     "mikro:up": "npx mikro-orm migration:up",
     "mikro:seed": "ts-node src/seeds/seed.ts",
     "build": "tsc --clean",
     "start": "node dist/app.js",
     "dev": "nodemon --watch 'src/**/*.ts' --exec ts-node src/app.ts"
+
   },
   "keywords": [],
   "author": "",
@@ -49,3 +51,4 @@
     "typescript": "^5.8.3"
   }
 }
+

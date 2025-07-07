@@ -13,6 +13,7 @@ services:
     volumes:
       - postgres-data:/var/lib/postgresql/data
 
+
   redis:
     image: redis:7
     restart: always
@@ -38,3 +39,4 @@ volumes:
   postgres-data:
   redis-data:
   pgadmin-data:
+

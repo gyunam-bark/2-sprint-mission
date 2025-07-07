@@ -1,0 +1,50 @@
+[
+  {
+    "email": "anonymous@sprint.com",
+    "name": "anonymous",
+    "password": "password-anonymous",
+    "role": "user",
+    "status": "active",
+    "isAnonymous": true
+  },
+  {
+    "email": "master@sprint.com",
+    "name": "master",
+    "password": "password-master",
+    "role": "master",
+    "status": "active",
+    "isAnonymous": false
+  },
+  {
+    "email": "example@sprint.com",
+    "name": "example",
+    "password": "password-example",
+    "role": "user",
+    "status": "active",
+    "isAnonymous": false
+  },
+  {
+    "email": "example2@sprint.com",
+    "name": "example2",
+    "password": "password-example",
+    "role": "user",
+    "status": "active",
+    "isAnonymous": false
+  },
+  {
+    "email": "example3@sprint.com",
+    "name": "example3",
+    "password": "password-example",
+    "role": "user",
+    "status": "active",
+    "isAnonymous": false
+  },
+  {
+    "email": "example4@sprint.com",
+    "name": "example4",
+    "password": "password-example",
+    "role": "user",
+    "status": "active",
+    "isAnonymous": false
+  }
+]
