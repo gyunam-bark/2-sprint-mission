@@ -1,0 +1,64 @@
+{
+  "name": "users",
+  "endpoints": [
+    {
+      "method": "POST",
+      "path": "/users",
+      "body": {
+        "email": "email",
+        "password": "string",
+        "name": "string"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/users",
+      "query": {
+        "offset": "number",
+        "limit": "number",
+        "sort": "string",
+        "query": "string",
+        "showInactive": "string"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/users/:id",
+      "params": {
+        "id": "string"
+      }
+    },
+    {
+      "method": "PATCH",
+      "path": "/users/:id",
+      "params": {
+        "id": "string"
+      },
+      "body": {
+        "name": "string",
+        "password": "string"
+      }
+    },
+    {
+      "method": "PATCH",
+      "path": "/users/deactivate/:id",
+      "params": {
+        "id": "string"
+      }
+    },
+    {
+      "method": "PATCH",
+      "path": "/users/activate/:id",
+      "params": {
+        "id": "string"
+      }
+    },
+    {
+      "method": "DELETE",
+      "path": "/users/:id",
+      "params": {
+        "id": "string"
+      }
+    }
+  ]
+}
