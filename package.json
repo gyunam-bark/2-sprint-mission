@@ -1,0 +1,23 @@
+{
+  "name": "sprint6",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "docker:up": "docker compose up -d",
+    "docker:down": "docker compose down --volumes",
+    "docker:clean": "docker compose down --volumes --rmi all --remove-orphans"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/codeit-bootcamp-nodejs/2-sprint-mission.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/codeit-bootcamp-nodejs/2-sprint-mission/issues"
+  },
+  "homepage": "https://github.com/codeit-bootcamp-nodejs/2-sprint-mission#readme"
+}
