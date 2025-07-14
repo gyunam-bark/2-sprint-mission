@@ -11,7 +11,7 @@ psql postgresql://postgres:password@localhost:5432
 ### 명령어
 
 ```bash
-CREATE DATABASE pizze_place;
+CREATE DATABASE pizza_place;
 ```
 
 ### 결과
