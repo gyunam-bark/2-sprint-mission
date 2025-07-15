@@ -1,450 +1,225 @@
-
 # 변경점
 
-## 추가된 스프린트 4 의 요구사항
+연습 삼아 또 개발환경 설정을 비롯하여 처음부터 다시 작성했습니다.
 
-그밖의 요구사항은 스프린트3 에서 이미 구현했었던 기능이었습니다.
+이번에는 typescript 니까 그것에 맞춰서 개발환경을 설정하는 것도 하고, orm 도 바꿔보고 했습니다.
 
-- [x] User 스키마 `name`\-\> `nickname`
+## express
 
-- [x] User 스키마 `image` 추가
+### promise rejection handling
 
-- [x] 좋아요 기능
-  - [x] 로그인한 유저는 상품에 '좋아요'와 '좋아요 취소'를 할 수 있습니다.
-  - [x] 로그인한 유저는 게시글에 '좋아요'와 '좋아요 취소'를 할 수 있습니다.
-  - [x] 상품 또는 게시글을 조회할 때, 유저가 '좋아요'를 누른 항목인지 확인할 수 있도록 isLiked와 같은 불린형 필드를 리스폰스 객체에 포함시켜 리스폰스해 주세요.
-  - [x] 유저가 '좋아요'를 표시한 상품의 목록을 조회하는 기능을 구현합니다.
+이번 주 수업 자료에서 express 가 콜백 기반으로 설계되어있고, async 로 구현될 경우 express 가 에러를 잡지 못하고 서버가 죽을 수 있다고 배웠습니다.
 
-## express.js -> hono.js 마이그레이션
-
-스프린트 미션 3 때 학습삼아 유저 기능을 어느정도 구현했기 때문에 미션이 너무 빨리 끝났습니다. 그래서 추가적으로 뭔가 더 학습 해볼 방법이 없는지 고민했습니다.
-
-그러다 문득, API 서버라고 하는 것의 동작하는 원리는 동일 할테니 다른 프레임워크를 써보면서 다시 처음부터 원리를 복습해보면 좋겠다는 생각이 들었습니다.
-
-만약 마이그레이션을 하는 도중 특정 부분에서 막힌 다면, 그것은 제가 이해하고 작성한게 아니라, 그렇게 동작을 하니까 작성했거나, 수업시간에 이렇게 하라고 해서 한 것일 가능성이 높을 것이라 예상했습니다.
-
-먼저 fastify 와 hono 를 비교했습니다.
-
-| 항목              | fastify                            | hono                                   |
-| :---------------- | :--------------------------------- | :------------------------------------- |
-| 런타임            | node                               | node/deno/bun                          |
-| 철학              | plugin 기반 확장성                 | 초경량 micro                           |
-| 성능              | 매우 빠름(express보다 2~3배)       | 매우 빠름(fastify 보다 아주 약간 우세) |
-| 라우팅            | 고급 기능 포함(스키마 검증, 훅 등) | 단순한 하루팅, express-like            |
-| 미들웨어          | 자체 시스템 + express-like         | app.use() 통일, 매우 간단한 체인       |
-| 스키마 검증       | 내장 JSON 스키마 검증              | 외부 미들웨어 필요                     |
-| 타입스크립트 지원 | 타입스크립트 퍼스트                | 타입스크립트 자동 추론 강력            |
-| 커뮤니티          | 크고 안정적                        | 성장 중이나 작음                       |
-
-로컬에서 간단한 헬스체크 하는 정도로는 fastify 와 hono 의 성능적 차이는 체감되지 않았습니다.
-
-그래서 실제 스프린트 미션 실습을 할 수 있는 약 3일 기간 내에서 빠르게 작업하기 위해서 구조적으로 express 에 더 가까운 구조를 가진 hono 를 선택해서 마이그레이션을 진행했습니다.
-
-## 엔드포인트 개선
-
-기본적인 헬스체크 엔드포인트를 구현하고 서버가 정상적으로 동작하는 것을 확인 한 후에, 전체적인 엔드포인트를 종이에 적어가면서 정리했습니다.
-
-### REST 원칙에 따라 상위리소스/하위리소스 구조로 개편
-
-초급 프로젝트를 진행할 때 보았던 API 명세서를 참고해서, 상위리소스/하위리소스 구조로 개편했습니다.
-
-**개선 전**
-
-- 전체 목록 표시만 고려함
-
-**개선 후**
-
-- `/users/:id/products` : `id` 인 `user` 가 가진 `product` 리스트
-
-### 개선된 엔드포인트
-
-```mermaid
-graph
-  subgraph Auth
-    AUTH_REGISTER[POST /auth/register]
-    AUTH_LOGIN[POST /auth/login]
-    AUTH_LOGOUT[POST /auth/logout]
-    AUTH_REFRESH[POST /auth/refresh]
-    AUTH_WITHDRAW[POST /auth/withdraw]
-  end
-
-  subgraph Root
-    ROOT_HEALTH[GET /]
-  end
-
-  subgraph Articles
-    A_LIST[GET /articles]
-    A_DETAIL[GET /articles/:id]
-    A_CREATE[POST /articles]
-    A_UPDATE[PATCH /articles/:id]
-    A_DEACTIVATE[POST /articles/:id/deactivate]
-    A_ACTIVATE[POST /articles/:id/activate]
-    A_DELETE[DELETE /articles/:id]
-    A_LIKE[POST /articles/:id/like]
-    A_COMMENT_CREATE[POST /articles/:id/comments]
-    A_COMMENT_LIST[GET /articles/:id/comments]
-  end
-
-  subgraph Products
-    P_LIST[GET /products]
-    P_DETAIL[GET /products/:id]
-    P_CREATE[POST /products]
-    P_UPDATE[PATCH /products/:id]
-    P_DEACTIVATE[POST /products/:id/deactivate]
-    P_ACTIVATE[POST /products/:id/activate]
-    P_DELETE[DELETE /products/:id]
-    P_LIKE[POST /products/:id/like]
-    P_COMMENT_CREATE[POST /products/:id/comments]
-    P_COMMENT_LIST[GET /products/:id/comments]
-  end
-
-  subgraph Comments
-    C_ARTICLE_UPDATE[PATCH /comments/article/:id]
-    C_ARTICLE_DEACTIVATE[POST /comments/article/:id/deactivate]
-    C_ARTICLE_ACTIVATE[POST /comments/article/:id/activate]
-    C_ARTICLE_DELETE[DELETE /comments/article/:id]
-    C_ARTICLE_LIKE[POST /comments/article/:id/like]
-
-    C_PRODUCT_UPDATE[PATCH /comments/product/:id]
-    C_PRODUCT_DEACTIVATE[POST /comments/product/:id/deactivate]
-    C_PRODUCT_ACTIVATE[POST /comments/product/:id/activate]
-    C_PRODUCT_DELETE[DELETE /comments/product/:id]
-    C_PRODUCT_LIKE[POST /comments/product/:id/like]
-  end
-
-  subgraph Images
-    IMAGE_UPLOAD[POST /images]
-    IMAGE_DELETE[DELETE /images/:id]
-  end
-
-  subgraph Logs
-    LOG_LIST[GET /logs]
-    LOG_DELETE[DELETE /logs/:id]
-  end
-
-  subgraph Users
-    USER_LIST[GET /users]
-    USER_DETAIL[GET /users/:id]
-    USER_UPDATE[PATCH /users/:id]
-    USER_DEACTIVATE[POST /users/:id/deactivate]
-    USER_ACTIVATE[POST /users/:id/activate]
-    USER_UNLOCK[POST /users/:id/unlock]
-    USER_DELETE[DELETE /users/:id]
-    USER_PRODUCTS[GET /users/:id/products]
-    USER_ARTICLES[GET /users/:id/articles]
-  end
-```
-
-## erd 설계 변경
-
-### 모델 분리로 단일 외래키 구성 → 데이터 무결성 확보
-
-- 기존에는 CommentLike 모델 하나에서 productCommentId와 articleCommentId를 nullable 필드로 함께 관리.
-
-- 두 필드 중 하나만 존재해야 하는 구조였지만, 데이터 무결성에 문제가 발생할 가능성 존재함.
-
-- nullable 로 사용해도 위의 문제를 방지하기 위한 코드를 작성해야하니, 그냥 테이블을 새로 만들어서 관리하는 방향으로 수정.
-
-### 수정된 erd
-
-```mermaid
-erDiagram
-  User {
-    String id
-    String nickname
-    String email
-    String password
-    UserStatus status
-    UserRole role
-    Boolean isArchiveUser
-    DateTime createdAt
-    DateTime updatedAt
-    DateTime deletedAt
-    DateTime lastLoginAt
-    String lastLoginIp
-    Int loginAttempts
-  }
-
-  Product {
-    String id
-    String name
-    String description
-    Int price
-    Int stock
-    ProductStatus status
-    DateTime createdAt
-    DateTime updatedAt
-    DateTime deletedAt
-  }
-
-  Article {
-    String id
-    String title
-    String content
-    CommonStatus status
-    DateTime createdAt
-    DateTime updatedAt
-    DateTime deletedAt
-  }
-
-  ProductComment {
-    String id
-    String content
-    CommonStatus status
-    DateTime createdAt
-    DateTime updatedAt
-    DateTime deletedAt
-  }
-
-  ArticleComment {
-    String id
-    String content
-    CommonStatus status
-    DateTime createdAt
-    DateTime updatedAt
-    DateTime deletedAt
-  }
-
-  ProductLike {
-    String id
-    DateTime createdAt
-  }
-
-  ArticleLike {
-    String id
-    DateTime createdAt
-  }
-
-  ProductCommentLike {
-    String id
-    DateTime createdAt
-  }
-
-  ArticleCommentLike {
-    String id
-    DateTime createdAt
-  }
-
-  RefreshToken {
-    String id
-    String token
-    DateTime createdAt
-    DateTime expiresAt
-  }
-
-  ProductImageLink {
-    String id
-  }
-
-  ArticleImageLink {
-    String id
-  }
-
-  ProductTag {
-    String id
-    String name
-    CommonStatus status
-    DateTime createdAt
-    DateTime updatedAt
-    DateTime deletedAt
-  }
-
-  ArticleTag {
-    String id
-    String name
-    CommonStatus status
-    DateTime createdAt
-    DateTime updatedAt
-    DateTime deletedAt
-  }
-
-  Image {
-    String id
-    String name
-    String url
-    String ext
-    DateTime createdAt
-  }
-
-  Log {
-    String id
-    String ip
-    String url
-    String method
-    String statusCode
-    String message
-    DateTime createdAt
-  }
-
-  User ||--o{ Product : creates
-  User ||--o{ Article : writes
-  User ||--o{ ProductComment : comments
-  User ||--o{ ArticleComment : comments
-  User ||--o{ ProductLike : likes
-  User ||--o{ ArticleLike : likes
-  User ||--o{ ProductCommentLike : likes
-  User ||--o{ ArticleCommentLike : likes
-  User ||--|| RefreshToken : has
-  User }o--|| Image : avatar
-
-  Product ||--o{ ProductComment : has
-  Product ||--o{ ProductLike : likedBy
-  Product ||--o{ ProductImageLink : images
-  Product ||--o{ ProductTag : tags
-
-  Article ||--o{ ArticleComment : has
-  Article ||--o{ ArticleLike : likedBy
-  Article ||--o{ ArticleImageLink : images
-  Article ||--o{ ArticleTag : tags
-
-  ProductComment ||--o{ ProductCommentLike : likedBy
-  ArticleComment ||--o{ ArticleCommentLike : likedBy
-
-  ProductImageLink ||--|| Image : image
-  ArticleImageLink ||--|| Image : image
-
-  ProductImageLink }o--|| Product : belongsTo
-  ArticleImageLink }o--|| Article : belongsTo
-```
-
-## prisma unique_id
-
-기존에는 findMany 로 userId 와 productId 를 where 로 필터링 하는 방법으로 해당 객체를 검색했습니다.
-
-그러다가 문득 `@@unique` 를 사용했는데, 정작 이걸 사용하고 있지 않다는 것을 깨달았습니다.
-
-```prisma
-@@unique([userId, productCommentId])
-```
-
-prisma 문서를 참고한 후, 특정 형식으로 `unique key alias` 를 검색할 수 있다는 것을 알게 되었습니다.
+그래서 아래의 `withAsync` 같이 **고차함수** 를 만들어서 사용하는 것을 권장하고 있었습니다.
 
 ```js
-const unlikedProduct = await prisma.productLike.delete({
-  where: {
-    userId_productId: {
-      userId,
-      productId,
-    },
-  },
-});
-return unlikedProduct;
-```
-
-기능을 단순히 외워서 사용해놓고 응용하지 못했다 는 것을 체감할 수 있었던 사례입니다.
-
-## superstruct -> joi
-
-스키마 검증 패키지를 joi 로 마이그레이션 해보았습니다.
-
-스키마 검증도 원리적으로는 다를 바가 없어서 금방 작업했습니다.
-
-다만, joi 의 경우에는 email 이나 uuid 같이 자주 쓰이는 스키마 객체가 기본 내장되어 있어서 별도의 패키지를 설치하지 않아도 된다는 점에서 설치해야 하는 패키지 수가 줄어든다는 장점이 좋았습니다.
-
-## 에러 처리 방법 변경
-
-hono 공식 예제 코드를 보는데 생각보다 try-catch 가 없다는 것을 깨달았습니다.
-
-이유가 궁금해서 hono 문서를 뒤적여보다가, hono 에 자동으로 throw 된 error 가 있으면, 동작하는 onError 내장 콜백이 있다는 것을 알 수 있었습니다.
-
-express 에서 기존 작성했던 코드는 가능한 모든 경우의 에러를 잡는 게 좋겠다 생각해서, try-catch 를 모든 controller 와 service 에 넣고 일일이 throw 하고 있었습니다.
-
-hono 로 마이그레이션하면서 "내가 작성한 try-catch 의 대부분은 굳이 필요없는 것일 수도 있다." 라는 가설을 세우고 에러 처리를 두가지 방법으로 나눠서 테스트 엔드포인트를 만들어서 테스트했습니다.
-
-- 공통: 의도적으로 /endpoint/1 을 하면 에러 throw
-
-1. /all
-
-   - controller, service 모두 try-catch 로 감싸고 throw 함
-
-2. /none
-   - controller, service 에 try-catch 가 없음
-
-테스트 결과, 2번(/none) 에서도 문제없이 onError 콜백으로 전달되는 것을 확인할 수 있었습니다.
-
-### try-catch 동작 원리 학습
-
-너무 무분별하게 try-catch 를 써왔던게 아닌가 하는 생각이 들어서, try-catch 가 어떻게 동작하는 지 다시 한번 복습했습니다.
-
-```js
-const test = async (shouldThrow) => {
-  if (shouldThrow) {
-    throw new Error('에러 발생');
-  }
-  return '성공';
+const withAsync = (handler) => {
+  return async (req, res, next) => {
+    try {
+      await handler(req, res, next);
+    } catch (error) {
+      next(error);
+    }
+  };
 };
-
-const main = async () => {
-  try {
-    const result = await test(true);
-    console.log(result);
-  } catch (error) {
-    console.error(error.message);
-  }
-};
-
-main();
 ```
 
-제가 사용하는 대부분의 코드는 await 를 사용해서 sync 처럼 사용했기 때문에 사실 async 코드를 작성했다는 느낌을 많이 못 받았습니다.
+그런데 문득 '어라, 저거 없이도 이때까지 async 에러를 잘 잡았는데?' 라는 생각이 들었습니다.
 
-그래서 try-catch 에 연관된 에러가 어떤 것들이 있는지 검색해서 setTimeout 예제를 확인 할 수 있었습니다.
+저 withAsync 를 써야한다는 것 자체를 수업을 듣기 전까지 몰랐다는 점이 의문이 떠오른 원인이었습니다.
 
-```js
-try {
-  setTimeout(() => {
-    throw new Error('에러 발생');
-  }, 1000);
-} catch (error) {
-  console.error('에러', errors.message);
+express 가 에러를 핸들링 하지 않았더라면, 실습하면서 서버가 터지는 경험이 있었어야 했습니다.
+
+그러나 수업을 듣는 순간에도 의도적으로 throw 한 에러들이 express 에서 글로벌 에러 핸들러로 전달되고 있었습니다.
+
+'async 로 API 서버를 작성하는 경우가 많고, express 가 이걸 개선했을 수도 있다'라고 생각해서 공식 문서에서 관련된 내용을 찾아보았습니다.
+
+놀랍게도 2024년, 딱 작년 말에 출시된 express v5 에서 개선되었고, 이제 공식적인 기본/최신 LTS 버전이 5.1 버전이 되었습니다.
+
+수업에서 사용하는 버전이 LTS 5.1 버전이었기 때문에, `promise rejection handling` 이 기본 적용 되어서 withAsync 같이 수동으로 에러 핸들링하는 고차함수가 없어도 async 에러를 express 가 자동으로 에러를 핸들링 하고 있었다는 것을 알게 되었습니다.
+
+## js -> ts
+
+사실 typescript 가 javascript 의 superset 언어기 때문에 문법적으로는 크게 어려운 부분이 없었습니다.
+
+typescript 에 먼저 추가되었지만, es6 이후로 javascript 에도 추가된 개념들이 있어서 generic 을 비롯한 몇가지 부분들만 살펴보아도 괜찮았습니다.
+
+아직 바로 떠오르진 않지만, 쓰면 쓸수록 손에 익을 것이라 생각하고 지금은 편하게 떠오르는 대로 작성하고, 리팩토링 하면서 다시 문법을 보는 방향으로 연습 중입니다.
+
+### 오타 방지 최고
+
+typescript 를 사용하면서 가장 좋았던 부분은 오타 방지가 확실하다는 것입니다.
+
+javascript 에서는 한 글자의 순서가 바뀌어도 일단은 undefined 로 만들어버리는 탓에 예기치 못한 에러가 발생하곤 했는데, typescript 를 쓰고 나서는 이 문제가 원천적으로 차단되어서 **정말 편하게** 코드를 작성했습니다.
+
+덕분에 스프린트 4 에서 찾지 못했던 오류들도 모두 잡아낼 수 있었습니다. 그리고 오류나 오타를 잡기 위해서 테스트하는 시간이 확 줄어서 javascript -> typescript 마이그레이션을 하면서 새로 작성하는데 딱 이틀 걸렸습니다.
+
+ORM 을 바꾸지 않았더라면, 하루만에 끝났을텐데 아쉽습니다.
+
+### 메서드로 전달되는 값의 확실성(?) 증가
+
+요청 값을 받아서 처리할 때 크게 도움받았습니다.
+
+선택적으로 받는 ? 인지 아니면 확실하게 있어야 하는 지에 따라서 에러를 보여줘서 요청을 위한 타입을 분리하거나 통일하거나 하는 작업이 편했습니다.
+
+처음에는 타입 체크라는 것을 체감하기가 어려웠는데, 코드를 계속 작성하다보니 '아, 이걸 위해서 타입 체크를 하는 거구나' 를 대략적으로 느낄 수 있었습니다.
+
+## nodemon vs tsx
+
+이번에 스프린트 미션에서 nodemon 을 사용하라고 되어 있는데, 찾아보니 tsx 패키지도 있어서 두 개를 비교하는 학습을 진행했습니다.
+
+원래라면 tsx 를 사용해서 esm 기반 코드를 작성하고 싶었지만, mikro 가 cjs 기반이라 호환성을 위해서 nodemon 으로 유지했습니다.
+
+| 항목           | nodemon                               | tsx                                     |
+| :------------- | :------------------------------------ | :-------------------------------------- |
+| 기본 목적      | node.js 앱 자동 재시작                | typescript/esm 코드 실행                |
+| 언어 지원      | javascript                            | typescript, javascript                  |
+| 설정 필요 여부 | 별도 설정 필요(tsc, ts-node 필요)     | 없음(내장)                              |
+| 호환성         | cjs 중심                              | esm 중심                                |
+| 실행 방식      | 파일 변경 감지 후 프로세스 재시작     | 빠른 핫리로딩 기반 실행                 |
+| 속도           | 느림(완전 재시작)                     | 빠름(메모리 기반 캐시 및 빠른 스타트업) |
+| 설치           | npm i -D nodemon                      | npm i -D                                |
+| 사용법         | nodemon --exec ts-node app.ts         | tsx watch app.ts                        |
+| 환경 파일 지원 | dotenv 로 직접 설정                   | .env 자동 지원                          |
+|                |                                       |                                         |
+| 장점           | 오래된(그리고 메이저한) 패키지 호환성 | 빠르고 간편한 typescript 호환성         |
+| 단점           | 느림                                  | 부족한 cjs 호환성                       |
+
+## prisma -> mikro
+
+멘토링 시간 때 본 토스 구인 공고에 있던 mikro-orm 으로 마이그레이션 해보았습니다.
+
+orm 이라고는 prisma 를 사용해본 게 처음이었기 때문에 비슷할 줄 알았습니다.
+
+만 전혀 달라서 [mikro 공식 문서](https://mikro-orm.io/docs/defining-entities) 를 보면서도 시간이 꽤 소요되었습니다.
+
+아마 js -> ts 마이그레이션 소요 시간 중 7할은 orm 마이그레이션에 사용한 것 같습니다.
+
+하면서 느낀 부분은 '아, 데이터베이스.. 라는 걸 내가 모르고 있구나!' 가 컸습니다.
+
+이번에 할 개인 학습용 미니 프로젝트는 직접 postgresql 과 쿼리로 통신하면서 SELECT 나 기본적인 개념을 다시 복습하는 걸로 해야겠다는 생각이 들었습니다.
+
+### mikro 는 cjs 기반
+
+처음에는 빠르고 좋고 최신이라고! 하면서 `tsx` 를 적용했습니다.
+
+그리고 헬스체크 엔드포인트를 구동할 때 까지만 해도 잘 동작해서 좋네~ 하고 만족하고 있었습니다.
+
+개발이 진행되면서 mikro 가 적용된 이후에 갑자기 에러가 발생해서 원인을 찾아보니 mikro 는 기본적으로 cjs 기반이라서 tsx 로 구동할 때 별도의 설정을 하거나, 예외처리를 해야했습니다.
+
+스프린트 미션이 nodemon 과 ts-node 를 사용하는 것이기 때문에, tsx 에서 nodemon + ts-node 조합으로 변경하는 방향으로 해결했습니다.
+
+그러나 이 잠깐의 사용에도 tsx 가 nodemon 보다 훨씬 빠르다는 것을 체감할 수 있었습니다.
+
+tsx 는 저장 후 곧바로 수정사항을 확인할 수 있었는데, nodemon 은 약 2~3 초 정도 후에 확인할 수 있었습니다.
+
+### pg-admin 기본 사용법 학습
+
+prisma 는 데이터베이스 관리 툴로 `prisma studio` 라는 기능을 제공하고 있습니다.
+
+이때까지는 이걸 쓰면서 편하게 작업하고 있었는데, 문제는 mikro 는 **초경량**을 지향하기 때문에 이런 부가적인 기능이 없다는 것이었습니다.
+
+그래서 도커에 pg-admin 을 추가해서 별도의 관리 툴로 모니터링 하도록 설정했습니다.
+
+prisma studio 에서도 데이터베이스에 잘 생성되고, 잘 수정되고, 잘 삭제 되는 지만 체크했어서 아주 기본적인 기능만 학습해서 바로 사용했습니다.
+
+> \[Tables\] - \[User\] - \[View/Edit Data\] - \[All Rows\]
+
+필요한 기능(CRUD)만 보았을 때는 구조적으로 간단해서, mikro 전용의 별도의 모니터링 앱을 만들고 패키지로 배포해보는 것도 재밌겠다는 생각이 들었습니다.
+
+### populate(JOIN)
+
+'결국 백엔드의 성능은 데이터베이스를 조회하고 필요한 값만큼 가져오는 것에서 좌우되는게 아닌가' 라는 생각을 하게 된 기능입니다.
+
+**1 User : 10 Product**
+
+| 항목             | with                                   | without                           |
+| :--------------- | :------------------------------------- | :-------------------------------- |
+| 연관 엔티티 조회 | 즉시 조회(JOIN or 서브쿼리)            | 조회 안 함                        |
+| 쿼리 갯수        | 1                                      | 1+10                              |
+| 속도             | 처음엔 느리나 전체적으론 효율적        | 처음엔 빠르나 10+1 문제 시 느려짐 |
+| 사용 패턴        | 응답에 product 내용도 포함되어야 할 때 | 내부 로직에서 ID 만 필요할 때     |
+
+서버 자체의 성능으로 보면, 개인적인 체감으로는 js 로 작성하나 python 으로 작성하나 비슷할 것이라고 생각되었습니다.
+
+물론, 성능에도 차이가 있겠지만, 실제로 어떤 서비스가 느리다고 평가 받을 때, 데이터베이스에서 처리하는 속도가 더 두드러지는 게 아닐까..라는 생각을 JOIN 이란 개념을 보면서 생각했습니다.
+
+아직 쿼리를 어떻게 짜야 효율적이다 라는 게 어렵지만, 코드와 마찬가지로 일단 구현하고 최적화하는 방향으로 학습하고 있습니다.
+
+#### lazy vs eager
+
+| 항목         | lazy                               | eager                                         |
+| :----------- | :--------------------------------- | :-------------------------------------------- |
+| 의미         | 실제 데이터는 필요할 때 로딩       | 연관된 데이터를 즉시 불러옴                   |
+| DB 접근 시점 | .load() 호출 시 DB 쿼리 발생       | 최초 엔티티 조회 시 JOIN 쿼리로 가져옴        |
+| 장점         | 성능 최적화 가능(필요할 때만 로딩) | 필드 즉시 접근 가능                           |
+| 단점         | N+1 쿼리 발생                      | 불필요한 관계까지 로딩 가능성                 |
+| 쿼리 수      | 필드 수 \* 엔티티 수               | 1~2쿼리                                       |
+| 사용 예시    | articleLike.article.load\(\)       | em.find\(..., \{populate: \[\'article\'\]\}\) |
+| 내부 동작    | 프록시 객체\(Reference\<T\>\) 생성 | 엔티티 데이터로 필드가 채워짐                 |
+
+## joi -> zod
+
+이로써 superstruct, joi, zod 3 개를 모두 사용해보았습니다.
+
+| 항목            | superstruct         | joi                | zod                     |
+| :-------------- | :------------------ | :----------------- | :---------------------- |
+| 스타일          | 선언적, 메서드 기반 | 체이닝             | 선언적, typescript 친화 |
+| typescript 지원 | 보통(수동 추론)     | 낮음(추론 안됨)    | 매우 좋음(자동 추론)    |
+| 에러 메시지     | 간단함              | 매우 상세함        | 간단하지만 커스텀 가능  |
+| 성능            | 빠름                | 보통               | 보통~빠름               |
+| 가독성          | 높음                | 체이닝 따라 복잡함 | 높음                    |
+| 유효성 방식     | min(string(), 1)    | .string().min(1)   | .string().min(1)        |
+| 패키지 크기     | 작음                | 비교적 큼          | 작음                    |
+
+결국, dto 라는 것의 근본적인 개념은 거의 동일해서, 프로젝트에 따라 편의성과 호환성에 따라서 선택하는 거구나를 느꼈습니다.
+
+typescript 로 마이그레이션을 할 때에는 zod 를 선택해서 수정했는데, 기존 joi 와 구조적으로 비슷해서 큰 수정 없이 바로 적용할 수 있었습니다.
+
+## api 버저닝 추가
+
+현재 작업된 버전은 `v1` 으로 각각의 엔드포인트 앞에 추가 되었습니다.
+
+## layered architecture 적용
+
+orm을 prisma 에서 mikro 로 옮기면서, 개인적으로 가장 어렵고 복잡했던 부분입니다.
+
+repository 를 가능한 데이터베이스 CRUD 코드만 남기려고 노력했습니다.
+
+그러나 transaction 을 사용하는 deactivate, activate, delete 의 경우엔 repository 다양한 option 값이 데이터베이스 코드와 직접적으로 연결되어서 동작해서 구분하는게 어려웠습니다.
+
+그래서 그냥 transaction 에서 경우마다 다르게 data 가 들어가야하는 경우엔 repository 에 넣어서 정리했습니다.
+
+## openapi.json -> swagger
+
+초급 프로젝트에서 수동으로 일일이 작성하는 것을 한번 해봤었기 때문에, 이번엔 그냥 챝지피티에 openapi.json 을 만들어달라고 요청했습니다.
+
+```text
+*.router.ts 와 validate.middleware.ts 파일들을 참고해서 openapi.json 을 만들어줘.
+```
+
+편하게.. 만들어질 줄 알았지만, 생각보다 zod 의 구조를 파악하지 못해서 {params, body, query} 구조에서 각각의 항목이 스웨거의 어느 항목인지 수동으로 알려주고 나서야 정상적으로 만들어졌습니다.
+
+챝지피티에 시키는 것도 연습이 필요하다..는 것을 느꼈습니다.
+
+## 메모리 사용량이.. 늘었다.
+
+초급 프로젝트를 할 때엔 대충 200MB 언저리였는데, 이리저리 패키지들이 붙으니 메모리가 늘어난 것을 알 수 있었습니다.
+
+```json
+{
+  "success": true,
+  "data": {
+    "status": "OK",
+    "uptime": 21.744990667,
+    "timestamp": "2025-07-04T01:44:10.534Z",
+    "memory": {
+      "rss": "490.16MB",
+      "heapTotal": "359.92MB",
+      "heapUsed": "313.70MB"
+    }
+  }
 }
 ```
 
-**실행 흐름 정리**
-
-1. setTimeout 메서드 호출
-
-2. node 런타임에 타이머 등록
-
-3. setTimeout 은 비동기작업 예약만 하고 바로 리턴
-
-4. try 는 아무런 에러도 확인 못하고 끝남
-
-5. 1 초후 콜백으로 throw 되지만, 이미 try-catch 와 무관한 context
-
-6. 에러는 전역 에러처럼 처리
-
-**context**
-
-- 메서드 실행할 때 생기는 임시 작업 공간
-
-**call stack**
-
-- 메서드가 실행되면, 그 호출 context 가 쌓이는 스택을 말함
-- 예외는 현재 실행 중인 스택 프레임 안에서만 try-catch 가능
-
-## redis
-
-jwt 로 발급한 토큰은 compare 만 할 뿐, 로그아웃을 해도 유효기간 내라면 정상적으로 사용할 수 있다는 문제가 있었습니다.
-
-이 문제를 해결하기 위해서 로그아웃을 하면 해당 토큰을 차단하는, 블랙리스트 기능을 추가하려고 했습니다.
-
-어떻게 구현을 해야할까 고민한 끝에 크게 두가지 방법이 있었습니다.
-
-1. express API 서버 메모리에 저장
-
-2. 데이터베이스에 저장
-
-1번은 서버를 껐다가 키면 메모리가 다 날라가는 문제가 있었습니다. 또한 주기적으로 만료된 토큰을 지워주지 않으면 메모리가 계속 쌓이기만 하는 문제가 발생 할 수 있었습니다.
-
-2번은 서버를 껐다 키더라도 토큰은 저장되어있지만, 자동 만료가 없어서 동일하게 주기적으로 만료된 토큰은 쿼리로 검색해서 정리해줘야 하는 문제가 있었습니다.
-
-그래서 뭔가 다른 방법이 있을텐데 라는 생각으로 검색을 해보니 redis 라는 것을 발견해서 적용했습니다.
-
-redis 에 대한 개념은 의외로(?) 간단하다고 받아들였습니다.
-
-그냥 `데이터의 수명을 지정하고 자동으로 삭제시킬 수 있는 인메모리 데이터베이스` 정도라고 인식하고 썼습니다.
-
-더 많은 활용방법이 있을텐데, 지금 구현하려고 했던 블랙리스트 의 기능 구현에는 충분한 정보였습니다.
-
-기존 데이터베이스 방식의 속도가 redis 보다 느리다고 하는데, 로컬에서 스프린트 미션을 하는 정도의 테스트 에서는 체감하기 힘든 단점이었습니다. 한번에 엄청난 양의 트래픽이 발생하고 동시다발적으로 API 호출이 있으면 차이가 더 두드러졌을 것 같기는 합니다.
+이제 스프린트로 하는 프로젝트도 배포를 해보려면, 램 1GB 정도는 되는 인스턴스를 사용해야 한다는 것을 알 수 있었습니다.

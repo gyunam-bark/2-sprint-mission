@@ -1,6 +1,6 @@
 node_modules
-prisma/migrations
 storage/*
+src/migrations/*
 .env
 .DS_Store
 __MASCOSX/
