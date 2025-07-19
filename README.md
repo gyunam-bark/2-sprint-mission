@@ -165,3 +165,11 @@ ROUND(CAST(SUM(a * b) AS numeric), 2)
 | INNER JOIN | 두 테이블에 공통된 데이터  | 빵을 산 고객만 보고 싶다.                         |
 | LEFT JOIN  | 왼쪽 기준, 오른쪽은 있으면 | 모든 고객 목록에 빵 판매 데이터 추가, 없으면 비움 |
 | RIGHT JOIN | 오른쪽 기준, 왼쪽은 있으면 | 모든 빵 판매 목록에서 누가 샀는지, 없으면 비움    |
+
+## RETURNING
+
+UPDATE 나 INSERT 를 하고 나온 결과를 넘길 수 있다.
+
+```sql
+RETURNING *;
+```
