@@ -100,16 +100,18 @@ SELECT
   COUNT(pl.user_id) AS like_count
 FROM products p
   INNER JOIN users AS u 
-  ON p.user_id = u.id
+    ON p.user_id = u.id
   LEFT JOIN product_likes AS pl 
-  ON p.id = pl.product_id
-WHERE u.nickname = 'test'
-  AND p.deleted_at IS NULL
+    ON p.id = pl.product_id
+WHERE p.deleted_at IS NULL
+  AND (
+    u.nickname ILIKE '%test%' OR
+    p.name ILIKE '%test%' OR
+    p.description ILIKE '%test%'
+  )
 GROUP BY p.id, u.nickname
 ORDER BY p.created_at DESC
-LIMIT 10 
-OFFSET 0
-; 
+LIMIT 10 OFFSET 0;
 
 /*
   8. 상품 상세 조회
