@@ -39,6 +39,8 @@ import { CreateArticleCommentRequest, GetArticleCommentListRequest } from '../ty
 import { ArticleCommentEntity } from '../entities/article-comment.entity';
 import { createArticleCommentEntity, getArticleCommentEntityList } from '../repositories/article-comment.repository';
 import { getArticleCommentLikeEntityList } from '../repositories/article-comment-like.repository';
+import { createNotice } from '../repositories/notice.repository';
+import { io } from '../utils/websocket';
 
 export const createArticle = async (user: Payload, request: CreateArticleRequest) => {
   const { body } = request;
@@ -240,7 +242,21 @@ export const createArticleComment = async (user: Payload, request: CreateArticle
   articleComment.createdAt = now;
   articleComment.updatedAt = now;
 
-  return await createArticleCommentEntity(articleComment);
+  const savedComment = await createArticleCommentEntity(articleComment);
+
+  const articleAuthor = existArticle.user;
+
+  if (articleAuthor.id !== user.id) {
+    const message = `당신의 게시글 "${existArticle.title}"에 댓글이 달렸습니다.`;
+
+    await createNotice(articleAuthor.id, message);
+
+    io.to(articleAuthor.id).emit('notice', {
+      message,
+    });
+  }
+
+  return savedComment;
 };
 
 export const getArticleCommentList = async (user: Payload, request: GetArticleCommentListRequest) => {

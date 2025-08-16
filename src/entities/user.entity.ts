@@ -11,6 +11,7 @@ import { ArticleLikeEntity } from './article-like.entity';
 import { ProductCommentLikeEntity } from './product-comment-like.entity';
 import { ArticleCommentLikeEntity } from './article-comment-like.entity';
 import { USER_STATUS, USER_ROLE } from '../enums/user.enum';
+import { NoticeEntity } from './notice.entity';
 
 @Entity({ tableName: 'User' })
 export class UserEntity {
@@ -82,4 +83,7 @@ export class UserEntity {
 
   @OneToMany(() => ArticleCommentLikeEntity, (like) => like.user)
   articleCommentLikes = new Collection<ArticleCommentLikeEntity>(this);
+
+  @OneToMany(() => NoticeEntity, (notice) => notice.user)
+  notices = new Collection<NoticeEntity>(this);
 }
