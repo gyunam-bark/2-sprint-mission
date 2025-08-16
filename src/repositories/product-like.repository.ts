@@ -3,6 +3,7 @@ import { ProductLikeEntity } from '../entities/product-like.entity';
 import { getEm } from '../utils/mikro.util';
 import { UserEntity } from '../entities/user.entity';
 
+
 export const getProductLikeEntityList = async <HINT extends string = never>(
   where: FilterQuery<ProductLikeEntity>,
   options: FindOptions<ProductLikeEntity, HINT>
@@ -42,6 +43,7 @@ export const deleteProductLikeEntity = async (like: ProductLikeEntity) => {
   await em.nativeDelete(ProductLikeEntity, like);
 };
 
+
 export const getUserListWhoLikedProduct = async (productId: string): Promise<UserEntity[]> => {
   const em = await getEm();
 
@@ -57,3 +59,4 @@ export const getUserListWhoLikedProduct = async (productId: string): Promise<Use
 
   return likes.map((like) => like.user);
 };
+

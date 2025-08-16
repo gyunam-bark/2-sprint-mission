@@ -42,6 +42,7 @@ import { getArticleCommentLikeEntityList } from '../repositories/article-comment
 import { createNotificationEntity } from '../repositories/notifications.repository';
 import { io } from '../utils/websocket';
 
+
 export const createArticle = async (user: Payload, request: CreateArticleRequest) => {
   const { body } = request;
   const { title, content, tags, images } = body;
@@ -241,6 +242,7 @@ export const createArticleComment = async (user: Payload, request: CreateArticle
   articleComment.content = content;
   articleComment.createdAt = now;
   articleComment.updatedAt = now;
+
 
   const savedComment = await createArticleCommentEntity(articleComment);
 
