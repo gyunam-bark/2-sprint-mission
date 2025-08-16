@@ -11,8 +11,6 @@ import {
   deleteUser,
   getProductList,
   getArticleList,
-  getNoticeList,
-  getNoticeUnreadList,
 } from '../services/users.service';
 import {
   ActivateUserRequest,
@@ -27,7 +25,6 @@ import {
 import { getUser } from '../utils/user.util';
 import { GetProductListRequest } from '../types/product.type';
 import { GetArticleListRequest } from '../types/article.type';
-import { GetNoticeListRequest } from '../types/notice.type';
 
 export const handleGetUserList: RequestHandler = async (req, res, next) => {
   const data = await getUserList(req.validated as GetUserListRequest);
@@ -88,20 +85,6 @@ export const handleGetProductList: RequestHandler = async (req, res, next) => {
 
 export const handleGetArticleList: RequestHandler = async (req, res, next) => {
   const data = await getArticleList(req.validated as GetArticleListRequest);
-
-  res.status(200).json(successResponse(data));
-};
-
-export const handleGetNoticeList: RequestHandler = async (req, res, next) => {
-  const user = getUser(req);
-  const data = await getNoticeList(user, req.validated as GetNoticeListRequest);
-
-  res.status(200).json(successResponse(data));
-};
-
-export const handleGetNoticeUnreadList: RequestHandler = async (req, res, next) => {
-  const user = getUser(req);
-  const data = await getNoticeUnreadList(user, req.validated as GetNoticeListRequest);
 
   res.status(200).json(successResponse(data));
 };

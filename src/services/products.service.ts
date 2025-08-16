@@ -5,7 +5,7 @@ import { ProductTagEntity } from '../entities/product-tag.entity';
 import { ProductEntity } from '../entities/product.entity';
 import { PRODUCT_STATUS } from '../enums/product.enum';
 import { getImageReference } from '../repositories/images.repository';
-import { createNotice } from '../repositories/notice.repository';
+import { createNotificationEntity } from '../repositories/notifications.repository';
 import { getProductCommentLikeEntityList } from '../repositories/product-comment-like.repository';
 import { createProductCommentEntity, getProductCommentEntityList } from '../repositories/product-comment.repository';
 import {
@@ -202,7 +202,7 @@ export const updateProduct = async (user: Payload, request: UpdateProductRequest
         product.name
       }"의 가격이 ${oldPrice.toLocaleString()}원에서 ${price.toLocaleString()}원으로 변경되었습니다.`;
 
-      await createNotice(likedUser.id, message);
+      await createNotificationEntity(likedUser.id, message);
 
       io.to(likedUser.id).emit('notice', { message });
     }

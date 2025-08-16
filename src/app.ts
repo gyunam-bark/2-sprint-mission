@@ -14,7 +14,7 @@ import articles from './routers/articles.router';
 import comments from './routers/comments.router';
 import logs from './routers/logs.router';
 import docs from './routers/docs.router';
-import notices from './routers/notices.router';
+import notifications from './routers/notifications.router';
 
 import { initializeSocket } from './utils/websocket';
 
@@ -36,7 +36,7 @@ app.use('/v1/articles', articles);
 app.use('/v1/comments', comments);
 app.use('/v1/logs', logs);
 app.use('/v1/docs', docs);
-app.use('v1/notices', notices);
+app.use('v1/notifications', notifications);
 
 // POST MIDDLEWARE
 app.use(notFoundHandler);

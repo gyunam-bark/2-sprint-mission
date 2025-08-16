@@ -35,8 +35,8 @@ import { getImageReference } from '../repositories/images.repository';
 import { getProductLikeEntityList } from '../repositories/product-like.repository';
 import { getArticleLikeEntityList } from '../repositories/article-like.repository';
 import { USER_STATUS } from '../enums/user.enum';
-import { GetNoticeListRequest } from '../types/notice.type';
-import { getNoticeEntityList } from '../repositories/notice.repository';
+import { GetNotificationListRequest } from '../types/notification.type';
+import { getNotificationEntityList } from '../repositories/notifications.repository';
 
 export const getUserList = async (reqeust: GetUserListRequest) => {
   const { query } = reqeust;
@@ -276,72 +276,6 @@ export const getArticleList = async (request: GetArticleListRequest) => {
   const data = {
     totalCount: articleList[1],
     list: articleList[0],
-  };
-
-  return data;
-};
-
-export const getNoticeList = async (user: Payload, request: GetNoticeListRequest) => {
-  const { params, query } = request;
-  const { offset, limit, sort } = query;
-  const { id } = params;
-
-  const where: Record<string, any> = {};
-
-  if (!id) {
-    throw new BadRequestError();
-  }
-
-  const userRef = await getUserReference(id);
-  where.user = userRef;
-
-  const orderBy = sortToOrderBy(sort);
-
-  const options = {
-    offset,
-    limit,
-    orderBy,
-  };
-
-  const noticeList = await getNoticeEntityList(where, options);
-
-  const data = {
-    totalCount: noticeList[1],
-    list: noticeList[0],
-  };
-
-  return data;
-};
-
-export const getNoticeUnreadList = async (user: Payload, request: GetNoticeListRequest) => {
-  const { params, query } = request;
-  const { offset, limit, sort } = query;
-  const { id } = params;
-
-  const where: Record<string, any> = {};
-
-  if (!id) {
-    throw new BadRequestError();
-  }
-
-  const userRef = await getUserReference(id);
-  where.user = userRef;
-
-  where.isRead = false;
-
-  const orderBy = sortToOrderBy(sort);
-
-  const options = {
-    offset,
-    limit,
-    orderBy,
-  };
-
-  const noticeList = await getNoticeEntityList(where, options);
-
-  const data = {
-    totalCount: noticeList[1],
-    list: noticeList[0],
   };
 
   return data;

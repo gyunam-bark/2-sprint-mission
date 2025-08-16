@@ -370,15 +370,21 @@ export const deleteLogSchema: Schema = {
 };
 
 // ===========================================
-// = NOTICES
+// = NOTIFICATIONS
 // ===========================================
-export const getNoticeListSchema: Schema = {
+export const getNotificationListSchema: Schema = {
   params: z.object({
     id: z.uuid().optional(),
   }),
 };
 
-export const getNoticeSchema: Schema = {
+export const getNotificationSchema: Schema = {
+  params: z.object({
+    id: z.uuid().optional(),
+  }),
+};
+
+export const readNotificationSchema: Schema = {
   params: z.object({
     id: z.uuid().optional(),
   }),

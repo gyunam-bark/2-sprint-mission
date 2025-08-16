@@ -2,8 +2,8 @@ import { Entity, Property, PrimaryKey, ManyToOne } from '@mikro-orm/core';
 import { v4 as uuidv4 } from 'uuid';
 import { UserEntity } from './user.entity';
 
-@Entity({ tableName: 'Notice' })
-export class NoticeEntity {
+@Entity({ tableName: 'Notification' })
+export class NotificationEntity {
   @PrimaryKey()
   id: string = uuidv4();
 

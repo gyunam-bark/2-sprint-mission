@@ -7,7 +7,6 @@ import {
   deactivateUserSchema,
   deleteUserSchema,
   getArticleListSchema,
-  getNoticeListSchema,
   getProductListSchema,
   getUserDetailSchema,
   getUserListSchema,
@@ -21,7 +20,6 @@ import {
   handleDeactivateUser,
   handleDeleteUser,
   handleGetArticleList,
-  handleGetNoticeList,
   handleGetProductList,
   handleGetUserDetail,
   handleGetUserList,
@@ -43,7 +41,5 @@ users.delete('/:id', allow([USER_ROLE.MASTER]), validate(deleteUserSchema), hand
 
 users.get('/:id/products', allow([USER_ROLE.USER]), validate(getProductListSchema), handleGetProductList);
 users.get('/:id/articles', allow([USER_ROLE.USER]), validate(getArticleListSchema), handleGetArticleList);
-users.get('/:id/notices', allow([USER_ROLE.USER]), validate(getNoticeListSchema), handleGetNoticeList);
-users.get('/:id/notices/unread', allow([USER_ROLE.USER]), validate(getNoticeListSchema), handleGetNoticeList);
 
 export default users;
