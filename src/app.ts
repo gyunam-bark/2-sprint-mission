@@ -1,5 +1,6 @@
-import express from 'express';
+import express, { application } from 'express';
 import './types/express.type';
+import http from 'http';
 import cookieParser from 'cookie-parser';
 import { listenHandler } from './handlers/listen.handler';
 import { notFoundHandler } from './handlers/not-found.handler';
@@ -13,8 +14,12 @@ import articles from './routers/articles.router';
 import comments from './routers/comments.router';
 import logs from './routers/logs.router';
 import docs from './routers/docs.router';
+import notifications from './routers/notifications.router';
+
+import { initializeSocket } from './utils/websocket';
 
 const app = express();
+const server = http.createServer(app);
 
 // PRE MIDDLEWARE
 app.use(express.json());
@@ -31,10 +36,14 @@ app.use('/v1/articles', articles);
 app.use('/v1/comments', comments);
 app.use('/v1/logs', logs);
 app.use('/v1/docs', docs);
+app.use('v1/notifications', notifications);
 
 // POST MIDDLEWARE
 app.use(notFoundHandler);
 app.use(globalErrorHandler);
 
+// SOCKET
+initializeSocket(server);
+
 // LISTEN
-app.listen(3000, listenHandler);
+server.listen(3000, listenHandler);

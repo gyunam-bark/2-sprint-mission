@@ -5,6 +5,7 @@ import { ProductTagEntity } from '../entities/product-tag.entity';
 import { ProductEntity } from '../entities/product.entity';
 import { PRODUCT_STATUS } from '../enums/product.enum';
 import { getImageReference } from '../repositories/images.repository';
+import { createNotificationEntity } from '../repositories/notifications.repository';
 import { getProductCommentLikeEntityList } from '../repositories/product-comment-like.repository';
 import { createProductCommentEntity, getProductCommentEntityList } from '../repositories/product-comment.repository';
 import {
@@ -12,6 +13,7 @@ import {
   deleteProductLikeEntity,
   getProductLikeEntity,
   getProductLikeEntityList,
+  getUserListWhoLikedProduct,
 } from '../repositories/product-like.repository';
 import { getProductTagReference } from '../repositories/product-tag.repository';
 import {
@@ -40,6 +42,7 @@ import {
 import { comparePassword } from '../utils/password.util';
 import { sortToOrderBy } from '../utils/to.util';
 import { isUserMaster, isUserOwner } from '../utils/user.util';
+import { io } from '../utils/websocket';
 
 export const createProduct = async (user: Payload, request: CreateProductRequest) => {
   const { body } = request;
@@ -144,6 +147,8 @@ export const updateProduct = async (user: Payload, request: UpdateProductRequest
 
   const product = await getProductEntity(params);
 
+  const oldPrice = product.price;
+
   if (!isUserMaster(user) && !isUserOwner(user, product)) {
     throw new ForbiddenError();
   }
@@ -188,6 +193,20 @@ export const updateProduct = async (user: Payload, request: UpdateProductRequest
   }
 
   await updateProductEntity(product);
+
+  if (price !== undefined && price !== oldPrice) {
+    const likedUsers = await getUserListWhoLikedProduct(product.id);
+
+    for (const likedUser of likedUsers) {
+      const message = `좋아요한 상품 "${
+        product.name
+      }"의 가격이 ${oldPrice.toLocaleString()}원에서 ${price.toLocaleString()}원으로 변경되었습니다.`;
+
+      await createNotificationEntity(likedUser.id, message);
+
+      io.to(likedUser.id).emit('notice', { message });
+    }
+  }
 
   return product;
 };

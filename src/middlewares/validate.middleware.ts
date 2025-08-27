@@ -368,6 +368,28 @@ export const deleteLogSchema: Schema = {
     password: z.string().min(4),
   }),
 };
+
+// ===========================================
+// = NOTIFICATIONS
+// ===========================================
+export const getNotificationListSchema: Schema = {
+  params: z.object({
+    id: z.uuid().optional(),
+  }),
+};
+
+export const getNotificationSchema: Schema = {
+  params: z.object({
+    id: z.uuid().optional(),
+  }),
+};
+
+export const readNotificationSchema: Schema = {
+  params: z.object({
+    id: z.uuid().optional(),
+  }),
+};
+
 // ===========================================
 // = MIDDLEWARE
 // ===========================================

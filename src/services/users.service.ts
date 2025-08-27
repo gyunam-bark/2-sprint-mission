@@ -30,11 +30,13 @@ import {
 import { isUserMaster, isUserYourself } from '../utils/user.util';
 import { sortToOrderBy } from '../utils/to.util';
 import { comparePassword } from '../utils/password.util';
-import { ForbiddenError, UnauthorizedError } from '../types/error.type';
+import { BadRequestError, ForbiddenError, UnauthorizedError } from '../types/error.type';
 import { getImageReference } from '../repositories/images.repository';
 import { getProductLikeEntityList } from '../repositories/product-like.repository';
 import { getArticleLikeEntityList } from '../repositories/article-like.repository';
 import { USER_STATUS } from '../enums/user.enum';
+import { GetNotificationListRequest } from '../types/notification.type';
+import { getNotificationEntityList } from '../repositories/notifications.repository';
 
 export const getUserList = async (reqeust: GetUserListRequest) => {
   const { query } = reqeust;
