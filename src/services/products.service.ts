@@ -277,7 +277,9 @@ export const createProductComment = async (user: Payload, request: CreateProduct
   productComment.createdAt = now;
   productComment.updatedAt = now;
 
-  return await createProductCommentEntity(productComment);
+  await createProductCommentEntity(productComment);
+
+  return productComment;
 };
 
 export const getProductCommentList = async (user: Payload, request: GetProductCommentListRequest) => {

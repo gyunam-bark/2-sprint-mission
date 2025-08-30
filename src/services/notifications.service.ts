@@ -17,7 +17,7 @@ export const getNotification = async (user: Payload, request: GetNotificationReq
     throw new BadRequestError();
   }
 
-  const userRef = await getUserReference(id);
+  const userRef = await getUserReference(user.id);
 
   const where = {
     id,
@@ -30,9 +30,11 @@ export const getNotification = async (user: Payload, request: GetNotificationReq
 };
 
 export const getNotificationList = async (user: Payload, request: GetNotificationListRequest) => {
-  const { params, query } = request;
+  const { query } = request;
   const { offset, limit, sort } = query;
-  const { id } = params;
+  const { id } = user;
+
+  console.log('user id', id);
 
   const where: Record<string, any> = {};
 
@@ -62,9 +64,9 @@ export const getNotificationList = async (user: Payload, request: GetNotificatio
 };
 
 export const getNotificationUnreadList = async (user: Payload, request: GetNotificationListRequest) => {
-  const { params, query } = request;
+  const { query } = request;
   const { offset, limit, sort } = query;
-  const { id } = params;
+  const { id } = user;
 
   const where: Record<string, any> = {};
 
@@ -99,7 +101,7 @@ export const updateNotificationRead = async (user: Payload, request: ReadNotific
   const { params } = request;
   const { id } = params;
 
-  const userRef = await getUserReference(id);
+  const userRef = await getUserReference(user.id);
 
   const where = {
     id,

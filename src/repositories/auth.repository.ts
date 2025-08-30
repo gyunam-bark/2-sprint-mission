@@ -28,10 +28,10 @@ export const getRefreshTokenEntityById = async (id: string): Promise<RefreshToke
   return await em.findOneOrFail(RefreshTokenEntity, { user: userRef });
 };
 
-export const getRefreshTokenEntity = async (user: UserEntity): Promise<RefreshTokenEntity> => {
+export const getRefreshTokenEntity = async (user: UserEntity): Promise<RefreshTokenEntity | null> => {
   const em = await getEm();
 
-  return await em.findOneOrFail(RefreshTokenEntity, { user: user });
+  return await em.findOne(RefreshTokenEntity, { user: user });
 };
 
 export const updateRefreshTokenEntity = async (refreshToken: RefreshTokenEntity): Promise<RefreshTokenEntity> => {

@@ -30,7 +30,7 @@ export const handleCreateArticle: RequestHandler = async (req, res, next) => {
   const user = getUser(req);
   const data = await createArticle(user, req.validated as CreateArticleRequest);
 
-  res.status(200).json(successResponse(data));
+  res.status(201).json(successResponse(data));
 };
 
 export const handleGetArticleList: RequestHandler = async (req, res, next) => {
@@ -84,7 +84,7 @@ export const handleCreateArticleComment: RequestHandler = async (req, res, next)
   const user = getUser(req);
   const data = await createArticleComment(user, req.validated as CreateArticleCommentRequest);
 
-  res.status(200).json(successResponse(data));
+  res.status(201).json(successResponse(data));
 };
 
 export const handleGetArticleCommentList: RequestHandler = async (req, res, next) => {

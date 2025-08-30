@@ -44,7 +44,7 @@ export const handleLogin: RequestHandler = async (req, res, next) => {
   setAccessToken(res, loggedIn.accessToken, loggedIn.accessCookieOptions);
   setRefreshToken(res, loggedIn.refreshToken, loggedIn.refreshCookieOptions);
 
-  const data = { token: loggedIn.accessToken };
+  const data = { token: loggedIn.accessToken, refreshToken: loggedIn.refreshToken };
 
   res.status(200).json(successResponse(data));
 };
@@ -71,7 +71,7 @@ export const handleRefresh: RequestHandler = async (req, res, next) => {
   setAccessToken(res, refreshed.accessToken, refreshed.accessCookieOptions);
   setRefreshToken(res, refreshed.refreshToken, refreshed.refreshCookieOptions);
 
-  const data = { token: refreshed.accessToken };
+  const data = { token: refreshed.accessToken, refreshToken: refreshed.refreshToken };
 
   res.status(200).json(successResponse(data));
 };
