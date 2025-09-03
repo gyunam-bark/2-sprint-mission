@@ -17,7 +17,7 @@ export class NotificationEntity {
   createdAt: Date = new Date();
 
   @Property({ onCreate: () => new Date() })
-  deletedAt: Date = new Date();
+  deletedAt?: Date | null;
 
   @Property({ type: Date, nullable: true })
   readAt?: Date | null;

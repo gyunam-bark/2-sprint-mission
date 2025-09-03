@@ -1,4 +1,4 @@
-import express, { application } from 'express';
+import express from 'express';
 import './types/express.type';
 import http from 'http';
 import cookieParser from 'cookie-parser';
@@ -35,8 +35,8 @@ app.use('/v1/products', products);
 app.use('/v1/articles', articles);
 app.use('/v1/comments', comments);
 app.use('/v1/logs', logs);
+app.use('/v1/notifications', notifications);
 app.use('/v1/docs', docs);
-app.use('v1/notifications', notifications);
 
 // POST MIDDLEWARE
 app.use(notFoundHandler);
@@ -45,5 +45,8 @@ app.use(globalErrorHandler);
 // SOCKET
 initializeSocket(server);
 
-// LISTEN
-server.listen(3000, listenHandler);
+if (process.env.NODE_ENV !== 'test') {
+  server.listen(3000, listenHandler);
+}
+
+export { app, server };

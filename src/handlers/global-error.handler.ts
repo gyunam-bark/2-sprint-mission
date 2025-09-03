@@ -38,6 +38,7 @@ export const globalErrorHandler: ErrorRequestHandler = async (
   log.url = getUrl(req);
   log.statusCode = String(status);
   log.createdAt = new Date();
+  log.message = message;
 
   await createLogEntity(log);
 

@@ -29,7 +29,7 @@ export const handleCreateProduct: RequestHandler = async (req, res, next) => {
   const user = getUser(req);
   const data = await createProduct(user, req.validated as CreateProductRequest);
 
-  res.status(200).json(successResponse(data));
+  res.status(201).json(successResponse(data));
 };
 
 export const handleGetProductList: RequestHandler = async (req, res, next) => {
@@ -83,7 +83,7 @@ export const handleCreateProductComment: RequestHandler = async (req, res, next)
   const user = getUser(req);
   const data = await createProductComment(user, req.validated as CreateProductCommentRequest);
 
-  res.status(200).json(successResponse(data));
+  res.status(201).json(successResponse(data));
 };
 
 export const handleGetProductCommentList: RequestHandler = async (req, res, next) => {

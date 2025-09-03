@@ -17,30 +17,15 @@ import {
 const notifications = express.Router();
 
 // 알림 디테일 정보를 받으면, 읽은 것으로 고려
+notifications.get('/', allow([USER_ROLE.USER]), validate(getNotificationListSchema), handleGetNotificationList);
 notifications.get(
-  '/notifications',
-  allow([USER_ROLE.USER]),
-  validate(getNotificationListSchema),
-  handleGetNotificationList
-);
-notifications.get(
-  '/notifications/unread',
+  '/unread',
   allow([USER_ROLE.USER]),
   validate(getNotificationListSchema),
   handleGetNotificationUnreadList
 );
-notifications.get(
-  '/notifications/:id',
-  allow([USER_ROLE.USER]),
-  validate(getNotificationSchema),
-  handleGetNotification
-);
+notifications.get('/:id', allow([USER_ROLE.USER]), validate(getNotificationSchema), handleGetNotification);
 // 수동 읽음 처리
-notifications.patch(
-  '/notifications/:id',
-  allow([USER_ROLE.USER]),
-  validate(readNotificationSchema),
-  handleReadNotification
-);
+notifications.patch('/:id', allow([USER_ROLE.USER]), validate(readNotificationSchema), handleReadNotification);
 
 export default notifications;

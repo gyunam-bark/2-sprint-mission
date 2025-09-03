@@ -186,7 +186,7 @@ export const createProductCommentSchema: Schema = {
 };
 export const updateProductCommentSchema: Schema = {
   params: z.object({
-    id: z.uuid,
+    id: z.uuid(),
   }),
   body: z.object({
     content: z.string().min(1),
@@ -248,8 +248,8 @@ export const updateArticleSchema: Schema = {
     id: z.uuid(),
   }),
   body: z.object({
-    title: z.string().min(1),
-    content: z.string().min(1),
+    title: z.string().min(1).optional(),
+    content: z.string().min(1).optional(),
     tags: z.array(z.uuid()).min(0).optional(),
     images: z.array(z.uuid()).min(0).optional(),
   }),
@@ -302,7 +302,7 @@ export const createArticleCommentSchema: Schema = {
 };
 export const updateArticleCommentSchema: Schema = {
   params: z.object({
-    id: z.uuid,
+    id: z.uuid(),
   }),
   body: z.object({
     content: z.string().min(1),
@@ -362,7 +362,7 @@ export const getLogListSchema: Schema = {
 };
 export const deleteLogSchema: Schema = {
   params: z.object({
-    id: z.uuid,
+    id: z.uuid(),
   }),
   body: z.object({
     password: z.string().min(4),
@@ -373,20 +373,22 @@ export const deleteLogSchema: Schema = {
 // = NOTIFICATIONS
 // ===========================================
 export const getNotificationListSchema: Schema = {
-  params: z.object({
-    id: z.uuid().optional(),
+  query: z.object({
+    offset: z.number().min(0).optional(),
+    limit: z.number().min(0).optional(),
+    sort: z.enum([COMMON_SORT.LATEST, COMMON_SORT.OLDEST]).optional(),
   }),
 };
 
 export const getNotificationSchema: Schema = {
   params: z.object({
-    id: z.uuid().optional(),
+    id: z.uuid(),
   }),
 };
 
 export const readNotificationSchema: Schema = {
   params: z.object({
-    id: z.uuid().optional(),
+    id: z.uuid(),
   }),
 };
 
