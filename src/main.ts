@@ -1,4 +1,9 @@
-import 'crypto';
+import * as nodeCrypto from 'crypto';
+
+if (!global.crypto) {
+  (global as any).crypto = nodeCrypto;
+}
+
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
