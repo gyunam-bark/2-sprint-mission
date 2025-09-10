@@ -16,6 +16,9 @@ export const config = {
     port: Number(requireEnv('PORT', '3000')),
     env: requireEnv('NODE_ENV', 'development'),
   },
+  external: {
+    gameService: requireEnv('GAME_SERVICE_URL', 'http://localhost:3002'),
+  },
   db: {
     host: requireEnv('DB_HOST', 'localhost'),
     port: Number(requireEnv('DB_PORT', '5432')),
