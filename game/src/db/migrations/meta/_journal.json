@@ -8,6 +8,13 @@
       "when": 1757481863336,
       "tag": "0000_tiresome_turbo",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1757486867560,
+      "tag": "0001_hot_black_cat",
+      "breakpoints": true
     }
   ]
 }

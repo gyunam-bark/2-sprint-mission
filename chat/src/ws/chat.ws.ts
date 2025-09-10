@@ -4,6 +4,7 @@ import { saveMessage } from '../services/message.service';
 import { Player } from '../types/player.type';
 import axios from 'axios';
 import { config } from '../config/config';
+import { verifyAccessToken } from '../utils/jwt.util';
 
 const players = new Map<string, Player>();
 
@@ -16,12 +17,39 @@ export function setupChatWebSocket(server: Server) {
     ws.on('message', async (msg: RawData) => {
       const data = JSON.parse(msg.toString());
 
-      if (data.type === 'join') {
-        current = { id: data.id, ws };
-        players.set(data.id, current);
+      if (data.type === 'auth') {
+        try {
+          const payload = verifyAccessToken(data.token);
+          current = { id: payload.id, ws };
+          players.set(current.id, current);
+          ws.send(JSON.stringify({ type: 'auth', success: true }));
+        } catch {
+          ws.send(JSON.stringify({ type: 'auth', success: false, error: 'Invalid token' }));
+          ws.close();
+        }
+        return;
       }
 
-      if (data.type === 'chat' && current) {
+      if (data.type === 'reauth') {
+        try {
+          const payload = verifyAccessToken(data.token);
+          if (current) players.delete(current.id);
+          current = { id: payload.id, ws };
+          players.set(current.id, current);
+          ws.send(JSON.stringify({ type: 'reauth', success: true }));
+        } catch {
+          ws.send(JSON.stringify({ type: 'reauth', success: false, error: 'Invalid token' }));
+          ws.close();
+        }
+        return;
+      }
+
+      if (!current) {
+        ws.send(JSON.stringify({ error: 'Not authenticated' }));
+        return;
+      }
+
+      if (data.type === 'chat') {
         const { scope, msg: message } = data;
 
         await saveMessage({
@@ -31,7 +59,6 @@ export function setupChatWebSocket(server: Server) {
         });
 
         if (scope === 'global') {
-          // 글로벌 브로드캐스트
           players.forEach((p) => p.ws.send(JSON.stringify({ from: current!.id, msg: message })));
         } else if (scope === 'local') {
           try {
@@ -41,7 +68,6 @@ export function setupChatWebSocket(server: Server) {
 
             const nearby = res.data.players;
 
-            // 해당 플레이어에게만 메시지 전송
             nearby.forEach((id) => {
               const target = players.get(id);
               if (target) {

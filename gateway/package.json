@@ -28,6 +28,7 @@
     "@koa/router": "^14.0.0",
     "@types/bcrypt": "^6.0.0",
     "@types/dotenv": "^6.1.1",
+    "@types/http-proxy": "^1.17.16",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/koa": "^3.0.0",
     "@types/koa__router": "^12.0.4",

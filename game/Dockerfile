@@ -1,4 +1,3 @@
-
 FROM node:20-alpine AS builder
 WORKDIR /app
 
@@ -19,6 +18,8 @@ RUN npm ci --omit=dev
 
 COPY --from=builder /app/dist ./dist
 COPY .env .env
+COPY seed.sql seed.sh ./   
 
 EXPOSE 3002
-CMD ["node", "dist/index.js"]
+
+CMD ["sh", "-c", "sh /app/seed.sh && node dist/index.js"]

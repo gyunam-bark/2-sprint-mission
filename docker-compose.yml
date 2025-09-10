@@ -6,8 +6,8 @@ services:
   #   env_file:
   #     - ./gateway/.env
   #   container_name: gateway-service
-  #   ports:
-  #     - '3000:3000'
+  #   expose:
+  #     - "3000"
   #   depends_on:
   #     - db
 
@@ -16,8 +16,8 @@ services:
   #   env_file:
   #     - ./chat/.env
   #   container_name: chat-service
-  #   ports:
-  #     - '3001:3001'
+  #   expose:
+  #     - "3001"
   #   depends_on:
   #     - db
 
@@ -26,8 +26,8 @@ services:
   #   env_file:
   #     - ./game/.env
   #   container_name: game-service
-  #   ports:
-  #     - '3002:3002'
+  #   expose:
+  #     - "3002"
   #   depends_on:
   #     - db
 
@@ -46,3 +46,4 @@ services:
 
 volumes:
   db-data:
+  # certbot-data:

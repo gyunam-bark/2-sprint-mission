@@ -23,6 +23,10 @@ export const config = {
     password: requireEnv('DB_PASSWORD', 'postgres'),
     name: requireEnv('DB_NAME', 'sprint11'),
   },
+  external: {
+    chat: requireEnv('CHAT_SERVICE_URL', 'http://localhost:3001'),
+    game: requireEnv('GAME_SERVICE_URL', 'http://localhost:3002'),
+  },
   jwt: {
     accessSecret: requireEnv('JWT_ACCESS_SECRET'),
     refreshSecret: requireEnv('JWT_REFRESH_SECRET'),

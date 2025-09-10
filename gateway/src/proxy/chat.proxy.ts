@@ -1,16 +1,12 @@
 import proxy from 'koa-proxies';
 import Router from '@koa/router';
+import { config } from '../config/config';
 
-const chatProxy = new Router();
+const chat = proxy('/chat', {
+  target: config.external.chat || 'http://localhost:3001',
+  changeOrigin: true,
+  logs: true,
+  rewrite: (path: string) => path.replace(/^\/chat/, ''),
+});
 
-chatProxy.all(
-  '/chat/(.*)',
-  proxy('/chat', {
-    target: process.env.CHAT_SERVICE_URL || 'http://localhost:3001',
-    ws: true,
-    changeOrigin: true,
-    logs: true,
-  })
-);
-
-export default chatProxy;
+export default chat;
