@@ -1,8 +1,9 @@
 import { Context } from 'koa';
 import { getMessageList } from '../services/message.service';
 import { GetMessageListRequest } from '../types/message.type';
+import { successResponse } from '../utils/response.util';
 
-export async function handleGetMessages(ctx: Context) {
+export async function handleGetMessageList(ctx: Context) {
   const params: GetMessageListRequest = {
     limit: ctx.query.limit ? parseInt(ctx.query.limit as string, 10) : 50,
     offset: ctx.query.offset ? parseInt(ctx.query.offset as string, 10) : 0,
@@ -15,8 +16,6 @@ export async function handleGetMessages(ctx: Context) {
 
   const messages = await getMessageList(params);
 
-  ctx.body = {
-    success: true,
-    data: messages,
-  };
+  ctx.status = 200;
+  ctx.body = successResponse(messages);
 }
