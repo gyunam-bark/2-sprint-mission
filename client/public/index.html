@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <title>SAMPLE GAME(DEV)</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <!-- 로그인 폼 -->
+    <div class="login-form">
+      <input type="text" id="username" placeholder="username" />
+      <input type="password" id="password" placeholder="password" />
+      <button id="signin">Sign In</button>
+    </div>
+
+    <!-- 게임 영역 -->
+    <div class="game-container">
+      <canvas id="gameCanvas"></canvas>
+    </div>
+
+    <!-- 채팅 영역 -->
+    <div class="chat-container">
+      <h3>채팅</h3>
+      <div id="chat-box"></div>
+      <div class="chat-input-row">
+        <input type="text" id="chat-input" placeholder="메시지를 입력하세요" />
+        <button id="chat-send">보내기</button>
+      </div>
+    </div>
+
+    <script src="bundle.js"></script>
+  </body>
+</html>

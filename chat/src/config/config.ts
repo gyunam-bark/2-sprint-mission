@@ -13,18 +13,21 @@ function requireEnv(key: string, defaultValue?: string): string {
 
 export const config = {
   app: {
-    port: Number(requireEnv('PORT', '3000')),
+    port: Number(requireEnv('PORT', '3001')),
     env: requireEnv('NODE_ENV', 'development'),
   },
   external: {
-    gameService: requireEnv('GAME_SERVICE_URL', 'http://localhost:3002'),
+    gateway: requireEnv('GATEWAY_SERVICE_URL', 'http://localhost:3000'),
+    chat: requireEnv('CHAT_SERVICE_URL', 'http://localhost:3001'),
+    game: requireEnv('GAME_SERVICE_URL', 'http://localhost:3002'),
+    client: requireEnv('CLIENT_SERVICE_URL', 'http://localhost:3003'),
   },
   db: {
     host: requireEnv('DB_HOST', 'localhost'),
     port: Number(requireEnv('DB_PORT', '5432')),
     user: requireEnv('DB_USER', 'postgres'),
     password: requireEnv('DB_PASSWORD', 'postgres'),
-    name: requireEnv('DB_NAME', 'sprint11'),
+    name: requireEnv('DB_NAME', 'sample-game'),
   },
   jwt: {
     accessSecret: requireEnv('JWT_ACCESS_SECRET'),

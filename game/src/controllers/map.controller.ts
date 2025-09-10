@@ -10,6 +10,8 @@ export async function handleGetMap(ctx: Context) {
     ctx.body = { success: false, error: 'Map not found' };
     return;
   }
+
+  ctx.status = 200;
   ctx.body = { success: true, data: map };
 }
 
@@ -21,10 +23,14 @@ export async function handleCreateMap(ctx: Context) {
     return;
   }
   const map = await createMap(name, data);
+
+  ctx.status = 201;
   ctx.body = { success: true, data: map };
 }
 
 export async function handleListMapList(ctx: Context) {
   const mapList = await listMaps();
+
+  ctx.status = 200;
   ctx.body = { success: true, data: mapList };
 }

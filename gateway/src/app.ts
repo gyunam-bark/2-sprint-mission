@@ -2,16 +2,22 @@ import Koa from 'koa';
 import bodyParser from 'koa-bodyparser';
 import { errorHandler } from './middleware/error.handler';
 import { notFoundHandler } from './middleware/not-found.handler';
-import proxy from 'koa-proxies';
-import { config } from './config/config';
+import cors from '@koa/cors';
 
 import root from './routers/root.router';
 import auth from './routers/auth.router';
 import chat from './proxy/chat.proxy';
 import game from './proxy/game.proxy';
+import { config } from './config/config';
 
 const app = new Koa();
 
+app.use(
+  cors({
+    origin: config.external.client,
+    credentials: true,
+  })
+);
 app.use(errorHandler);
 app.use(bodyParser());
 

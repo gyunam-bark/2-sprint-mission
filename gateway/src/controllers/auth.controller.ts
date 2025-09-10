@@ -1,5 +1,5 @@
 import { Context } from 'koa';
-import { signup, signin, refresh } from '../services/auth.service';
+import { signup, signin, refresh, getUserById } from '../services/auth.service';
 import { SignInRequest, SignUpRequest } from '../types/user.type';
 import { errorResponse, successResponse } from '../utils/response.util';
 import { RefreshRequest } from '../types/auth.type';
@@ -24,13 +24,31 @@ export const handleSignIn = async (ctx: Context) => {
   }
 
   const result = await signin(username, password);
+
+  ctx.set('Authorization', `Bearer ${result.accessToken}`);
+
+  const isProduction = process.env.NODE_ENV === 'production';
+
+  ctx.cookies.set('accessToken', result.accessToken, {
+    httpOnly: true,
+    secure: isProduction,
+    sameSite: isProduction ? 'none' : 'lax',
+    path: '/',
+  });
+
+  ctx.cookies.set('refreshToken', result.refreshToken, {
+    httpOnly: true,
+    secure: isProduction,
+    sameSite: isProduction ? 'none' : 'lax',
+    path: '/',
+  });
+
   ctx.status = 200;
   ctx.body = successResponse(result);
 };
 
-export async function handleRefresh(ctx: Context) {
+export const handleRefresh = async (ctx: Context) => {
   const { refreshToken } = ctx.request.body as RefreshRequest;
-
   if (!refreshToken) {
     ctx.status = 400;
     ctx.body = errorResponse(400, 'Refresh token is required');
@@ -39,10 +57,27 @@ export async function handleRefresh(ctx: Context) {
 
   try {
     const tokens = await refresh(refreshToken);
+
+    const isProduction = process.env.NODE_ENV === 'production';
+
+    ctx.cookies.set('accessToken', tokens.accessToken, {
+      httpOnly: true,
+      secure: isProduction,
+      sameSite: isProduction ? 'none' : 'lax',
+      path: '/',
+    });
+
+    ctx.cookies.set('refreshToken', tokens.refreshToken, {
+      httpOnly: true,
+      secure: isProduction,
+      sameSite: isProduction ? 'none' : 'lax',
+      path: '/',
+    });
+
     ctx.status = 200;
     ctx.body = successResponse(tokens);
   } catch (err) {
     ctx.status = 401;
     ctx.body = errorResponse(401, (err as Error).message);
   }
-}
+};

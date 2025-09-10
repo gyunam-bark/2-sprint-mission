@@ -38,7 +38,7 @@ services:
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: sprint11
+      POSTGRES_DB: game-sample
     ports:
       - '5432:5432'
     volumes:
