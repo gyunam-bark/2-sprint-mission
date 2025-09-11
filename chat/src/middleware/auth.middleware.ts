@@ -25,7 +25,7 @@ export const authMiddleware = async (ctx: Context, next: Next) => {
 
   try {
     const payload = verifyAccessToken(token);
-    ctx.state.user = payload; // 이후 라우트 핸들러에서 ctx.state.user 사용 가능
+    ctx.state.user = payload;
     await next();
   } catch {
     ctx.status = 401;

@@ -1,9 +1,12 @@
-import { pgTable, uuid, integer, timestamp, text, jsonb } from 'drizzle-orm/pg-core';
+import { pgTable, uuid, integer, timestamp, text, jsonb, doublePrecision } from 'drizzle-orm/pg-core';
 
 export const players = pgTable('players', {
   id: uuid('id').defaultRandom().primaryKey(),
-  x: integer('x').notNull().default(0),
-  y: integer('y').notNull().default(0),
+  username: text('username').notNull(),
+  x: doublePrecision('x').notNull().default(0),
+  y: doublePrecision('y').notNull().default(0),
+  dir: doublePrecision('dir').notNull().default(0),
+  color: text('color').notNull(),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });

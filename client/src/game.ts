@@ -1,31 +1,50 @@
 import { fetchMapData } from './api';
 import { setMapData } from './state';
-import { initWebSocket } from './network';
+import { initGameNetwork, initChatNetwork } from './network';
 import { initRenderer, render } from './renderer';
 import { initInputHandlers, handleKeyboardInput } from './input';
+import { initChatUI } from './ui';
+import { sendChatMessage } from './chat.network';
 
-export async function initGame(): Promise<void> {
+let gameLoopStarted = false;
+
+export async function startGame(): Promise<void> {
   try {
     const canvas = document.getElementById('gameCanvas') as HTMLCanvasElement;
+    if (!canvas) {
+      throw new Error('캔버스를 찾을 수 없습니다 (#gameCanvas).');
+    }
 
-    // 1. 맵 데이터 로드 및 상태 초기화
+    // 1. 렌더러 초기화
+    initRenderer(canvas);
+
+    // 2. 입력 핸들러 등록
+    initInputHandlers();
+
+    // 3. 맵 불러오기
     const mapData = await fetchMapData();
     setMapData(mapData);
 
-    // 2. 모듈 초기화
-    initRenderer(canvas);
-    initInputHandlers(canvas);
-    initWebSocket();
+    // 4. 네트워크 초기화
+    initGameNetwork();
+    initChatNetwork();
 
-    // 3. 메인 게임 루프 시작
-    function gameLoop() {
-      handleKeyboardInput(); // 키보드 입력 처리
-      render(); // 화면 렌더링
-      requestAnimationFrame(gameLoop);
+    // 5. UI 초기화
+    initChatUI((message, scope) => {
+      sendChatMessage(message, scope);
+    });
+
+    // 6. 게임 루프 시작
+    if (!gameLoopStarted) {
+      gameLoopStarted = true;
+      function gameLoop() {
+        handleKeyboardInput();
+        render();
+        requestAnimationFrame(gameLoop);
+      }
+      gameLoop();
     }
-    gameLoop();
   } catch (error) {
-    alert((error as Error).message);
-    console.error('Failed to initialize game:', error);
+    console.error('게임 시작 실패:', error);
   }
 }

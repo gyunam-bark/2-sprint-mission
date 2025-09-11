@@ -1,5 +1,5 @@
 import { gameState, setMyPlayer } from './state';
-import { sendMoveUpdate } from './network';
+import { sendMoveUpdate } from './game.network';
 
 const keys: Record<string, boolean> = {};
 
@@ -15,19 +15,19 @@ export function handleKeyboardInput() {
   const step = 0.05;
   const turn = 0.05;
 
-  let newX = me.x,
-    newY = me.y,
-    newDir = me.dir;
+  let newX = me.x;
+  let newY = me.y;
+  let newDir = me.dir;
 
-  if (keys['a']) {
+  if (keys['arrowleft']) {
     newDir -= turn;
     moved = true;
   }
-  if (keys['d']) {
+  if (keys['arrowright']) {
     newDir += turn;
     moved = true;
   }
-  if (keys['w']) {
+  if (keys['arrowup']) {
     const nx = me.x + Math.cos(me.dir) * step;
     const ny = me.y + Math.sin(me.dir) * step;
     if (canMove(nx, ny)) {
@@ -36,7 +36,7 @@ export function handleKeyboardInput() {
       moved = true;
     }
   }
-  if (keys['s']) {
+  if (keys['arrowdown']) {
     const nx = me.x - Math.cos(me.dir) * step;
     const ny = me.y - Math.sin(me.dir) * step;
     if (canMove(nx, ny)) {
@@ -52,17 +52,12 @@ export function handleKeyboardInput() {
   }
 }
 
-export function initInputHandlers(canvas: HTMLCanvasElement) {
-  window.addEventListener('keydown', (e) => (keys[e.key.toLowerCase()] = true));
-  window.addEventListener('keyup', (e) => (keys[e.key.toLowerCase()] = false));
+export function initInputHandlers() {
+  window.addEventListener('keydown', (e) => {
+    keys[e.key.toLowerCase()] = true;
+  });
 
-  canvas.addEventListener('click', () => canvas.requestPointerLock());
-
-  document.addEventListener('mousemove', (e) => {
-    if (document.pointerLockElement === canvas) {
-      const newDir = gameState.me.dir + e.movementX * 0.002;
-      setMyPlayer({ dir: newDir });
-      sendMoveUpdate(gameState.me);
-    }
+  window.addEventListener('keyup', (e) => {
+    keys[e.key.toLowerCase()] = false;
   });
 }

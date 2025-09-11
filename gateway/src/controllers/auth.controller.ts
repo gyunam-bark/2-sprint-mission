@@ -81,3 +81,30 @@ export const handleRefresh = async (ctx: Context) => {
     ctx.body = errorResponse(401, (err as Error).message);
   }
 };
+
+export const handleMe = async (ctx: Context) => {
+  try {
+    const userId = ctx.state.user?.id;
+    if (!userId) {
+      ctx.status = 401;
+      ctx.body = errorResponse(401, 'Unauthorized');
+      return;
+    }
+
+    const user = await getUserById(userId);
+    if (!user) {
+      ctx.status = 404;
+      ctx.body = errorResponse(404, 'User not found');
+      return;
+    }
+
+    ctx.status = 200;
+    ctx.body = successResponse({
+      id: user.id,
+      username: user.username,
+    });
+  } catch (err) {
+    ctx.status = 500;
+    ctx.body = errorResponse(500, (err as Error).message);
+  }
+};

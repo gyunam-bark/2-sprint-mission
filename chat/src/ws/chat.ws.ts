@@ -1,38 +1,57 @@
-// chat.ws.ts
-
 import { WebSocketServer, WebSocket, RawData } from 'ws';
 import type { Server } from 'http';
 import { saveMessage } from '../services/message.service';
-import { Player } from '../types/player.type';
+import { NearbyResponse, Player } from '../types/player.type';
 import axios from 'axios';
 import { config } from '../config/config';
 import { verifyAccessToken } from '../utils/jwt.util';
 
-const players = new Map<string, Player>();
+type PlayerWithToken = Player & { token: string };
+
+const players = new Map<string, PlayerWithToken>();
 
 export function setupChatWebSocket(server: Server) {
   const wss = new WebSocketServer({ server, path: '/chat' });
 
   wss.on('connection', (ws: WebSocket) => {
-    let current: Player | null = null;
+    let current: PlayerWithToken | null = null;
 
     ws.on('message', async (msg: RawData) => {
-      // **수정**: 핸들러 전체를 try...catch로 감싸서 숨겨진 에러 잡기
       try {
-        // **추가**: JSON 파싱 전에 원본 데이터부터 로그로 확인
-        console.log(`[서버] 메시지 수신 (RAW): ${msg.toString()}`);
-
         const data = JSON.parse(msg.toString());
 
-        console.log(`[서버] 메시지 수신 (PARSED):`, data);
-
+        // --- 인증 처리 ---
         if (data.type === 'auth') {
           try {
             const payload = verifyAccessToken(data.token);
-            current = { id: payload.id, ws };
+            current = { id: payload.id, ws, username: payload.username, token: data.token };
             players.set(current.id, current);
+
             console.log(`[서버] 플레이어 인증 성공: ${current.id}. 현재 접속자: ${players.size}명`);
-            ws.send(JSON.stringify({ type: 'auth', success: true, id: current.id }));
+
+            // 본인에게 인증 성공 응답
+            ws.send(
+              JSON.stringify({
+                type: 'auth',
+                success: true,
+                id: current.id,
+                username: current.username,
+              })
+            );
+
+            // 다른 사람들에게 입장 알림
+            players.forEach((p) => {
+              if (p.id !== current!.id && p.ws.readyState === WebSocket.OPEN) {
+                p.ws.send(
+                  JSON.stringify({
+                    type: 'chat',
+                    scope: 'global',
+                    from: '관리자',
+                    msg: `${current!.username}님이 입장하셨습니다.`,
+                  })
+                );
+              }
+            });
           } catch (authError) {
             console.error('[서버] 인증 토큰 오류:', authError);
             ws.send(JSON.stringify({ type: 'auth', success: false, error: 'Invalid token' }));
@@ -56,21 +75,60 @@ export function setupChatWebSocket(server: Server) {
           await saveMessage({ senderId: current.id, scope, message });
 
           if (scope === 'global') {
-            const recipientIds = Array.from(players.keys());
-            console.log(`[서버] 메시지 전체 방송 to ${recipientIds.length}명:`, recipientIds);
             players.forEach((p) => {
               if (p.ws.readyState === WebSocket.OPEN) {
-                p.ws.send(JSON.stringify({ from: current!.id, msg: message }));
+                p.ws.send(
+                  JSON.stringify({
+                    type: 'chat',
+                    scope: 'global',
+                    from: current!.username,
+                    msg: message,
+                  })
+                );
               }
             });
           } else if (scope === 'local') {
-            // 로컬 채팅 로직 (생략)
+            try {
+              const resp = await axios.get<NearbyResponse>(`${config.external.game}/players/nearby/${current.id}`, {
+                params: { radius: 1 },
+                headers: { Authorization: `Bearer ${current.token}` },
+              });
+
+              console.log(`[서버] 로컬 메시지 대상자 조회:`, resp.data);
+
+              const nearbyPlayers = resp.data?.data.players ?? [];
+
+              nearbyPlayers.forEach((p: any) => {
+                const target = players.get(p.id);
+                if (target && target.ws.readyState === WebSocket.OPEN) {
+                  target.ws.send(
+                    JSON.stringify({
+                      type: 'chat',
+                      scope: 'local',
+                      from: current!.username,
+                      msg: message,
+                    })
+                  );
+                }
+              });
+
+              // 본인에게도 메시지 돌려주기
+              if (current.ws.readyState === WebSocket.OPEN) {
+                current.ws.send(
+                  JSON.stringify({
+                    type: 'chat',
+                    scope: 'local',
+                    from: current.username,
+                    msg: message,
+                  })
+                );
+              }
+            } catch (err) {
+              console.error('[서버] 로컬 메시지 처리 오류:', err);
+            }
           }
-        } else {
-          console.log(`[서버] 'chat' 타입이 아닌 메시지 수신:`, data);
         }
       } catch (error) {
-        // **추가**: 핸들러 내에서 발생하는 모든 에러를 여기서 잡습니다.
         console.error('[서버] 메시지 처리 중 심각한 오류 발생:', error);
       }
     });
@@ -79,6 +137,19 @@ export function setupChatWebSocket(server: Server) {
       if (current) {
         players.delete(current.id);
         console.log(`[서버] 플레이어 접속 종료: ${current.id}. 현재 접속자: ${players.size}명`);
+
+        players.forEach((p) => {
+          if (p.ws.readyState === WebSocket.OPEN) {
+            p.ws.send(
+              JSON.stringify({
+                type: 'chat',
+                scope: 'global',
+                from: '관리자',
+                msg: `${current!.username}님이 퇴장하셨습니다.`,
+              })
+            );
+          }
+        });
       }
     });
   });

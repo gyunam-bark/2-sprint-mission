@@ -1,104 +1,145 @@
 import { WebSocketServer, WebSocket, RawData } from 'ws';
 import type { Server } from 'http';
-import { Player } from '../types/player.type';
-import { movePlayer, getNearbyPlayerList } from '../services/player.service';
+import { createPlayer, movePlayer, getNearbyPlayerList, removePlayer } from '../services/player.service';
 import { verifyAccessToken } from '../utils/jwt.util';
+import { getDefaultSpawnPoint } from '../services/map.service';
+import { getRandomColor } from '../utils/color.util';
+import { db } from '../db';
+import { players } from '../db/schema';
 
-const players = new Map<string, Player>();
+const connections = new Map<string, WebSocket>();
 
 export function setupGameWebSocket(server: Server) {
   const wss = new WebSocketServer({ server, path: '/game' });
 
   function broadcast(message: any, exclude?: WebSocket) {
     const msg = JSON.stringify(message);
-    players.forEach((p) => {
-      if (p.ws.readyState === WebSocket.OPEN && p.ws !== exclude) {
-        p.ws.send(msg);
+    connections.forEach((ws) => {
+      if (ws.readyState === WebSocket.OPEN && ws !== exclude) {
+        ws.send(msg);
       }
     });
   }
 
-  wss.on('join', (ws: WebSocket) => {
-    let current: Player | null = null;
+  wss.on('connection', (ws: WebSocket) => {
+    let currentId: string | null = null;
+    let currentUsername: string | null = null;
 
     ws.on('message', async (msg: RawData) => {
       try {
         const data = JSON.parse(msg.toString());
 
-        // --- 인증 ---
+        // === 인증 처리 ===
         if (data.type === 'auth' || data.type === 'reauth') {
           try {
             const payload = verifyAccessToken(data.token);
-            if (current) players.delete(current.id);
 
-            current = { id: payload.id, x: 0, y: 0, ws: ws, dir: 0 };
-            players.set(current.id, current);
+            currentId = payload.id;
+            currentUsername = payload.username;
 
-            ws.send(JSON.stringify({ type: data.type, success: true, id: current.id }));
+            if (!currentId || !currentUsername) {
+              throw new Error('Invalid token payload (missing id or username)');
+            }
 
-            // 접속 알림
-            broadcast({ type: 'join', id: current.id, x: current.x, y: current.y }, ws);
+            const spawn = await getDefaultSpawnPoint();
+            const color = getRandomColor();
 
-            // 현재 접속자 목록 전송
+            connections.set(currentId, ws);
+
+            await removePlayer(currentId);
+            await createPlayer(currentId, currentUsername, spawn.x + 0.5, spawn.y + 0.5, 0, color);
+
+            // 인증 성공 응답 (username 포함)
             ws.send(
               JSON.stringify({
-                type: 'state',
-                players: Array.from(players.values()).map((p) => ({
-                  id: p.id,
-                  x: p.x,
-                  y: p.y,
-                })),
+                type: data.type,
+                success: true,
+                id: currentId,
+                username: currentUsername,
+                x: spawn.x + 0.5,
+                y: spawn.y + 0.5,
+                dir: 0,
+                color,
               })
             );
-          } catch {
-            ws.send(JSON.stringify({ type: data.type, success: false, error: 'Invalid token' }));
+
+            // 전체 상태 브로드캐스트
+            const all = await db.select().from(players);
+            const fullState = {
+              type: 'state',
+              players: all.map((p) => ({
+                id: p.id,
+                username: p.username,
+                x: p.x,
+                y: p.y,
+                dir: p.dir,
+                color: p.color,
+              })),
+            };
+
+            broadcast(fullState);
+          } catch (err) {
+            console.error('Auth error:', err);
+            ws.send(
+              JSON.stringify({
+                type: data.type,
+                success: false,
+                error: 'Invalid token',
+              })
+            );
             ws.close();
           }
           return;
         }
 
-        // --- 인증 안된 경우 ---
-        if (!current) {
+        // === 인증 안 된 경우 ===
+        if (!currentId || !currentUsername) {
           ws.send(JSON.stringify({ error: 'Not authenticated' }));
           return;
         }
 
-        // --- 이동 ---
+        // === 이동 처리 ===
         if (data.type === 'move') {
-          current.x = data.x;
-          current.y = data.y;
-          current.dir = data.dir;
-          await movePlayer(current.id, current.x, current.y);
+          await movePlayer(currentId, data.x, data.y, data.dir);
 
-          // 내 상태 갱신
+          // 내 위치 업데이트 응답 (서버 저장 username만 사용)
           ws.send(
             JSON.stringify({
               type: 'selfUpdate',
-              id: current.id,
-              x: current.x,
-              y: current.y,
-              dir: current.dir,
+              id: currentId,
+              username: currentUsername,
+              x: data.x,
+              y: data.y,
+              dir: data.dir,
             })
           );
 
-          // 다른 플레이어에게 알림
+          // 다른 플레이어에게 브로드캐스트
           broadcast(
             {
               type: 'playerMove',
-              id: current.id,
-              x: current.x,
-              y: current.y,
-              dir: current.dir,
+              id: currentId,
+              username: currentUsername,
+              x: data.x,
+              y: data.y,
+              dir: data.dir,
             },
             ws
           );
 
-          // 내게는 전체 상태 주기
-          const nearby = await getNearbyPlayerList(current.id, 50);
+          // 근처 플레이어 목록 보내주기
+          const nearby = await getNearbyPlayerList(currentId, 50);
           ws.send(
             JSON.stringify({
               type: 'nearbyPlayers',
-              players: nearby,
+              players: nearby.map((p) => ({
+                id: p.id,
+                username: p.username,
+                x: p.x,
+                y: p.y,
+                dir: p.dir,
+                color: p.color,
+              })),
             })
           );
         }
@@ -107,11 +148,13 @@ export function setupGameWebSocket(server: Server) {
       }
     });
 
-    ws.on('close', () => {
-      if (current) {
-        players.delete(current.id);
-        console.log(`Player ${current.id} disconnected`);
-        broadcast({ type: 'leave', id: current.id });
+    // === 연결 종료 처리 ===
+    ws.on('close', async () => {
+      if (currentId) {
+        connections.delete(currentId);
+        await removePlayer(currentId);
+        console.log(`[서버] 플레이어 접속 종료: ${currentId}. 현재 접속자: ${connections.size}명`);
+        broadcast({ type: 'leave', id: currentId });
       }
     });
   });

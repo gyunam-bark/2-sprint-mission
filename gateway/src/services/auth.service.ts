@@ -19,12 +19,20 @@ export const signup = async (username: string, password: string) => {
 
 export const signin = async (username: string, password: string) => {
   const [user] = await db.select().from(users).where(eq(users.username, username));
-  if (!user) throw new Error('Invalid credentials');
+  if (!user) {
+    const error: any = new Error('User not found');
+    error.status = 404;
+    throw error;
+  }
 
   const valid = await comparePassword(password, user.password);
-  if (!valid) throw new Error('Invalid credentials');
+  if (!valid) {
+    const error: any = new Error('Invalid password');
+    error.status = 401;
+    throw error;
+  }
 
-  const payload: Payload = { id: user.id };
+  const payload: Payload = { id: user.id, username: user.username };
   const accessToken = generateAccessToken(payload);
   const refreshToken = generateRefreshToken(payload);
 
@@ -33,8 +41,12 @@ export const signin = async (username: string, password: string) => {
 
 export const refresh = async (refreshToken: string) => {
   const payload = verifyRefreshToken(refreshToken) as Payload;
-  const newAccessToken = generateAccessToken(payload);
-  const newRefreshToken = generateRefreshToken(payload);
+  const [user] = await db.select().from(users).where(eq(users.id, payload.id));
+  if (!user) throw new Error('User not found');
+
+  const newPayload: Payload = { id: user.id, username: user.username };
+  const newAccessToken = generateAccessToken(newPayload);
+  const newRefreshToken = generateRefreshToken(newPayload);
 
   return { accessToken: newAccessToken, refreshToken: newRefreshToken };
 };

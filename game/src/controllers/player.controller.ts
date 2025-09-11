@@ -3,22 +3,22 @@ import { movePlayer, getNearbyPlayerList } from '../services/player.service';
 import { successResponse, errorResponse } from '../utils/response.util';
 
 export const handleMovePlayer = async (ctx: Context) => {
-  const { id, x, y } = ctx.request.body as { id: string; x: number; y: number };
+  const { id, x, y, dir } = ctx.request.body as { id: string; x: number; y: number; dir: number };
 
-  if (!id || x === undefined || y === undefined) {
+  if (!id || x === undefined || y === undefined || dir === undefined) {
     ctx.status = 400;
-    ctx.body = errorResponse(400, 'id, x, y are required');
+    ctx.body = errorResponse(400, 'id, x, y, dir are required');
     return;
   }
 
-  await movePlayer(id, x, y);
+  await movePlayer(id, x, y, dir);
 
   ctx.status = 200;
   ctx.body = successResponse({ message: 'Player moved successfully' });
 };
 
 export const handleGetNearbyPlayerList = async (ctx: Context) => {
-  const { id } = ctx.params;
+  const id = ctx.state.user.id;
   const radius = Number(ctx.query.radius ?? 50);
 
   if (!id) {
