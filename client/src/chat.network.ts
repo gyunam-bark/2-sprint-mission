@@ -8,7 +8,7 @@ let chatSocket: WebSocket;
 
 export function initChatNetwork() {
   chatSocket = createWebSocket(
-    'ws://localhost:3000/chat',
+    'ws://api.messagoom.online/chat',
     (ws) => {
       console.log('Chat connected. Authenticating...');
       const token = getAuthToken();

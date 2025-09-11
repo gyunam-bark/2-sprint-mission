@@ -1,783 +1,248 @@
 <!DOCTYPE html>
 <html lang="ko">
-  <head>
-    <meta charset="UTF-8" />
-    <title>SAMPLE GAME</title>
-    <style>
-      body {
-        margin: 0;
-        font-family: Arial, sans-serif;
-        background-color: #222;
-        color: #eee;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        min-height: 100vh;
-      }
+<head>
+  <meta charset="UTF-8">
+  <title>SAMPLE GAME</title>
+  <style>
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background-color: #222;
+  color: #eee;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 100vh;
+}
 
-      /* 로그인 폼 */
-      .login-form {
-        width: 640px;
-        display: flex;
-        justify-content: flex-start;
-        gap: 8px;
-        margin: 16px 0;
-      }
+/* 로그인 폼 */
+.login-form {
+  width: 640px;
+  display: flex;
+  justify-content: flex-start;
+  gap: 8px;
+  margin: 16px 0;
+}
 
-      .login-form input,
-      .login-form button {
-        padding: 8px;
-        font-size: 14px;
-        border: none;
-        border-radius: 4px;
-      }
+.login-form input,
+.login-form button {
+  padding: 8px;
+  font-size: 14px;
+  border: none;
+  border-radius: 4px;
+}
 
-      .login-form input {
-        flex: 1;
-      }
+.login-form input {
+  flex: 1;
+}
 
-      .login-form button {
-        background-color: #555;
-        color: #fff;
-        cursor: pointer;
-      }
-      .login-form button:hover {
-        background-color: #777;
-      }
+.login-form button {
+  background-color: #555;
+  color: #fff;
+  cursor: pointer;
+}
+.login-form button:hover {
+  background-color: #777;
+}
 
-      /* 메인 레이아웃 */
-      .main-container {
-        display: flex;
-        flex-direction: column; /* 세로 배치 */
-        gap: 16px;
-        width: 100%;
-        max-width: 800px;
-        flex: 1;
-        padding: 16px;
-        box-sizing: border-box;
-      }
+/* 메인 레이아웃 */
+.main-container {
+  display: flex;
+  flex-direction: column; /* 세로 배치 */
+  gap: 16px;
+  width: 100%;
+  max-width: 800px;
+  flex: 1;
+  padding: 16px;
+  box-sizing: border-box;
+}
 
-      /* 게임 영역 */
-      .game-container {
-        background: #000;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        border: 2px solid #444;
-        border-radius: 6px;
-        width: 100%;
-        height: 400px;
-      }
+/* 게임 영역 */
+.game-container {
+  background: #000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: 2px solid #444;
+  border-radius: 6px;
+  width: 100%;
+  height: 400px;
+}
 
-      .game-container canvas {
-        display: block;
-        width: 100%;
-        height: 100%;
-        image-rendering: pixelated;
-        image-rendering: crisp-edges;
-      }
+.game-container canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+}
 
-      /* 사용자 목록 */
-      .user-list-container {
-        background: #333;
-        border-radius: 6px;
-        padding: 10px;
-        box-sizing: border-box;
-      }
+/* 사용자 목록 */
+.user-list-container {
+  background: #333;
+  border-radius: 6px;
+  padding: 10px;
+  box-sizing: border-box;
+}
 
-      .user-list-container h3 {
-        margin: 0 0 8px 0;
-        font-size: 16px;
-      }
+.user-list-container h3 {
+  margin: 0 0 8px 0;
+  font-size: 16px;
+}
 
-      #user-list {
-        list-style: none;
-        margin: 0;
-        padding: 0;
-        max-height: 120px;
-        overflow-y: auto;
-      }
+#user-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  max-height: 120px;
+  overflow-y: auto;
+}
 
-      #user-list li {
-        padding: 4px 0;
-        border-bottom: 1px solid #444;
-      }
+#user-list li {
+  padding: 4px 0;
+  border-bottom: 1px solid #444;
+}
 
-      /* 채팅 영역 */
-      .chat-container {
-        background: #333;
-        border-radius: 6px;
-        display: flex;
-        flex-direction: column;
-        padding: 10px;
-        box-sizing: border-box;
-      }
+/* 채팅 영역 */
+.chat-container {
+  background: #333;
+  border-radius: 6px;
+  display: flex;
+  flex-direction: column;
+  padding: 10px;
+  box-sizing: border-box;
+}
 
-      .chat-container h3 {
-        margin: 0 0 8px 0;
-      }
+.chat-container h3 {
+  margin: 0 0 8px 0;
+}
 
-      .chat-section {
-        margin-bottom: 8px;
-      }
+.chat-section {
+  margin-bottom: 8px;
+}
 
-      .chat-section h4 {
-        margin: 4px 0;
-        font-size: 14px;
-        color: #ccc;
-      }
+.chat-section h4 {
+  margin: 4px 0;
+  font-size: 14px;
+  color: #ccc;
+}
 
-      .chat-box {
-        height: 100px;
-        background: #111;
-        overflow-y: auto;
-        padding: 8px;
-        border-radius: 4px;
-        margin-bottom: 8px;
-        box-sizing: border-box;
-      }
+.chat-box {
+  height: 100px;
+  background: #111;
+  overflow-y: auto;
+  padding: 8px;
+  border-radius: 4px;
+  margin-bottom: 8px;
+  box-sizing: border-box;
+}
 
-      /* 채팅 메시지 스타일 */
-      .my-message {
-        text-align: left;
-        color: #4caf50;
-      }
-      .other-message {
-        text-align: left;
-        color: #fff;
-      }
-      .system-message {
-        text-align: left;
-        color: #aaa;
-        font-style: italic;
-      }
-      .admin-message {
-        text-align: left;
-        color: #ff9800;
-        font-weight: bold;
-      }
-      .chat-input-row {
-        display: flex;
-        gap: 8px;
-      }
-      #chat-scope {
-        padding: 6px;
-        border-radius: 4px;
-        border: none;
-        background: #555;
-        color: #fff;
-      }
-      #chat-input {
-        flex: 1;
-        padding: 8px;
-        border: none;
-        border-radius: 4px;
-      }
-      #chat-send {
-        padding: 8px 12px;
-        background-color: #555;
-        border: none;
-        border-radius: 4px;
-        color: #fff;
-        cursor: pointer;
-      }
-      #chat-send:hover {
-        background-color: #777;
-      }
-      .logo {
-        font-size: 32px;
-        font-weight: bold;
-        text-align: center;
-        margin: 24px 0 12px 0;
-        color: #fff;
-      }
-    </style>
-  </head>
-  <body>
-    <!-- 로고 텍스트 -->
-    <h1 class="logo">Messagoom</h1>
+/* 채팅 메시지 스타일 */
+.my-message {
+  text-align: left;
+  color: #4caf50;
+}
+.other-message {
+  text-align: left;
+  color: #fff;
+}
+.system-message {
+  text-align: left;
+  color: #aaa;
+  font-style: italic;
+}
+.admin-message {
+  text-align: left;
+  color: #ff9800;
+  font-weight: bold;
+}
+.chat-input-row {
+  display: flex;
+  gap: 8px;
+}
+#chat-scope {
+  padding: 6px;
+  border-radius: 4px;
+  border: none;
+  background: #555;
+  color: #fff;
+}
+#chat-input {
+  flex: 1;
+  padding: 8px;
+  border: none;
+  border-radius: 4px;
+}
+#chat-send {
+  padding: 8px 12px;
+  background-color: #555;
+  border: none;
+  border-radius: 4px;
+  color: #fff;
+  cursor: pointer;
+}
+#chat-send:hover {
+  background-color: #777;
+}
+.logo {
+  font-size: 32px;
+  font-weight: bold;
+  text-align: center;
+  margin: 24px 0 12px 0;
+  color: #fff;
+}
 
-    <!-- 로그인 폼 -->
-    <div class="login-form">
-      <input type="text" id="username" placeholder="username" />
-      <input type="password" id="password" placeholder="password" />
-      <button id="signin">Sign In</button>
+  </style>
+</head>
+<body>
+  <!-- 로고 텍스트 -->
+  <h1 class="logo">Messagoom</h1>
+
+  <!-- 로그인 폼 -->
+  <div class="login-form">
+    <input type="text" id="username" placeholder="username" />
+    <input type="password" id="password" placeholder="password" />
+    <button id="signin">Sign In</button>
+  </div>
+
+  <!-- 메인 레이아웃 -->
+  <div class="main-container">
+    <div class="game-container">
+      <canvas id="gameCanvas"></canvas>
     </div>
 
-    <!-- 메인 레이아웃 -->
-    <div class="main-container">
-      <div class="game-container">
-        <canvas id="gameCanvas"></canvas>
-      </div>
-
-      <div class="user-list-container">
-        <h3>접속자 목록</h3>
-        <ul id="user-list"></ul>
-      </div>
-
-      <div class="chat-container">
-        <h3>채팅</h3>
-
-        <div class="chat-section">
-          <h4>전체</h4>
-          <div id="chat-box-global" class="chat-box"></div>
-        </div>
-
-        <div class="chat-section">
-          <h4>지역</h4>
-          <div id="chat-box-local" class="chat-box"></div>
-        </div>
-
-        <div class="chat-input-row">
-          <select id="chat-scope">
-            <option value="global">전체</option>
-            <option value="local">지역</option>
-          </select>
-          <input type="text" id="chat-input" placeholder="메시지를 입력하세요" />
-          <button id="chat-send">보내기</button>
-        </div>
-      </div>
+    <div class="user-list-container">
+      <h3>접속자 목록</h3>
+      <ul id="user-list"></ul>
     </div>
 
-    <script>
-      'use strict';
-      (() => {
-        var l = (e, t) => () => (e && (t = e((e = 0))), t);
-        var Be = (e, t) => () => (t || e((t = { exports: {} }).exports, t), t.exports);
-        function De() {
-          return sessionStorage.getItem('accessToken');
-        }
-        async function K() {
-          let e = De();
-          if (!e) throw new Error('\uB85C\uADF8\uC778\uC774 \uD544\uC694\uD569\uB2C8\uB2E4.');
-          let t = await fetch('http://localhost:3000/game/maps', { headers: { Authorization: `Bearer ${e}` } });
-          if (t.status === 401) throw new Error('\uC778\uC99D\uC774 \uB9CC\uB8CC\uB418\uC5C8\uC2B5\uB2C8\uB2E4.');
-          let o = await t.json();
-          if (!o.success || !o.data)
-            throw new Error(
-              o.error?.message ||
-                '\uB9F5 \uB370\uC774\uD130\uB97C \uBD88\uB7EC\uC624\uB294 \uB370 \uC2E4\uD328\uD588\uC2B5\uB2C8\uB2E4.'
-            );
-          return o.data[0].data;
-        }
-        var Q = l(() => {
-          'use strict';
-        });
-        function h(e) {
-          r.me = { ...r.me, ...e, username: e.username ?? r.me.username };
-        }
-        function B(e) {
-          if (e.id === r.me.id) return;
-          let t = r.otherPlayers[e.id];
-          r.otherPlayers[e.id] = { ...(t ?? {}), ...e, username: e.username ?? t?.username ?? '' };
-        }
-        function V(e) {
-          delete r.otherPlayers[e], delete r.spriteTextures[e];
-        }
-        function _(e) {
-          r.mapData = e;
-          for (let t = 0; t < e.length; t++)
-            for (let o = 0; o < e[t].length; o++)
-              if (e[t][o] === 2) {
-                h({ x: o + 0.5, y: t + 0.5 });
-                return;
-              }
-        }
-        function ee(e) {
-          r.zBuffer = new Array(e).fill(1 / 0);
-        }
-        function D(e, t) {
-          r.zBuffer[e] = t;
-        }
-        function H(e) {
-          return r.zBuffer[e];
-        }
-        var r,
-          d = l(() => {
-            'use strict';
-            r = {
-              me: { id: '', username: '', x: 0, y: 0, dir: 0, color: 'red' },
-              otherPlayers: {},
-              mapData: [],
-              zBuffer: [],
-              spriteTextures: {},
-            };
-          });
-        function C() {
-          return sessionStorage.getItem('accessToken');
-        }
-        function v(e, t, o, n, i) {
-          let a = new WebSocket(e);
-          return (
-            (a.onopen = () => t(a)),
-            (a.onmessage = (s) => {
-              try {
-                let c = JSON.parse(s.data);
-                o(c);
-              } catch {
-                console.error('Failed to parse WebSocket message:', s.data);
-              }
-            }),
-            (a.onclose = () => n?.()),
-            (a.onerror = (s) => i?.(s)),
-            a
-          );
-        }
-        var O = l(() => {
-          'use strict';
-        });
-        function A() {
-          S = v(
-            'ws://localhost:3000/game',
-            (e) => {
-              let t = C();
-              t ? e.send(JSON.stringify({ type: 'auth', token: t })) : e.close();
-            },
-            He,
-            () => {},
-            () => {}
-          );
-        }
-        function He(e) {
-          switch (e.type) {
-            case 'auth':
-            case 'reauth':
-              e.success ? ((I = e.id), h(e)) : S.close();
-              break;
-            case 'state':
-              e.players.forEach((o) => {
-                o.id === I ? h(o) : B(o);
-              });
-              break;
-            case 'playerMove':
-              e.id === I ? h(e) : B(e);
-              break;
-            case 'selfUpdate':
-              h(e);
-              break;
-            case 'nearbyPlayers':
-              let t = {};
-              e.players.forEach((o) => {
-                o.id === I ? h(o) : (t[o.id] = o);
-              }),
-                (r.otherPlayers = t);
-              break;
-            case 'leave':
-              V(e.id);
-              break;
-          }
-        }
-        function N(e) {
-          S &&
-            S.readyState === WebSocket.OPEN &&
-            e.id &&
-            S.send(JSON.stringify({ type: 'move', id: e.id, username: e.username, x: e.x, y: e.y, dir: e.dir }));
-        }
-        var I,
-          S,
-          W = l(() => {
-            'use strict';
-            d();
-            O();
-            I = '';
-          });
-        function te(e) {
-          let t = document.getElementById('chat-input'),
-            o = document.getElementById('chat-send'),
-            n = document.getElementById('chat-scope');
-          if (!t || !o || !n || typeof e != 'function') return;
-          let i = () => {
-            let a = t.value.trim(),
-              s = n.value || 'global';
-            a && (e(a, s), (t.value = ''));
-          };
-          o.addEventListener('click', i),
-            t.addEventListener('keypress', (a) => {
-              a.key === 'Enter' && i();
-            });
-        }
-        function R(e, t, o, n = 'global') {
-          let i = n === 'global' ? 'chat-box-global' : 'chat-box-local',
-            a = document.getElementById(i);
-          if (!a) return;
-          let s = document.createElement('div');
-          e === '\uAD00\uB9AC\uC790'
-            ? ((s.textContent = t), (s.className = 'admin-message'))
-            : ((s.textContent = `${o ? '\uB098' : e}: ${t}`), (s.className = o ? 'my-message' : 'other-message')),
-            a.appendChild(s),
-            (a.scrollTop = a.scrollHeight);
-        }
-        var U = l(() => {
-          'use strict';
-        });
-        function j() {
-          x = v(
-            'ws://localhost:3000/chat',
-            (e) => {
-              console.log('Chat connected. Authenticating...');
-              let t = C();
-              t
-                ? e.send(JSON.stringify({ type: 'auth', token: t }))
-                : (console.error('Chat authentication failed: Token not found.'), e.close());
-            },
-            Oe,
-            () => console.log('Chat connection closed.'),
-            (e) => console.error('Chat WebSocket Error:', e)
-          );
-        }
-        function Oe(e) {
-          switch (e.type) {
-            case 'auth':
-              e.success
-                ? ((oe = e.id), ($ = e.username), console.log(`Chat authenticated. ID: ${oe}, Username: ${$}`))
-                : (console.error('Chat authentication failed:', e.error), x.close());
-              break;
-            case 'chat':
-              if (e.from && e.msg) {
-                let t = e.scope === 'local' ? 'local' : 'global';
-                if (e.from === '\uAD00\uB9AC\uC790') {
-                  R('\uAD00\uB9AC\uC790', e.msg, !1, t);
-                  return;
-                }
-                let o = e.from === $;
-                R(e.from, e.msg, o, t);
-              } else console.warn('Malformed chat message received:', e);
-              break;
-            default:
-              console.log('Unhandled chat message:', e);
-              break;
-          }
-        }
-        function q(e, t = 'global') {
-          if (x && x.readyState === WebSocket.OPEN) {
-            let o = { type: 'chat', scope: t, msg: e };
-            x.send(JSON.stringify(o));
-          }
-        }
-        var oe,
-          $,
-          x,
-          z = l(() => {
-            'use strict';
-            U();
-            O();
-            (oe = ''), ($ = '');
-          });
-        var ne = l(() => {
-          'use strict';
-          W();
-          z();
-        });
-        function re(e, t) {
-          (e.fillStyle = '#87CEEB'),
-            e.fillRect(0, 0, t.width, t.height / 2),
-            (e.fillStyle = '#444'),
-            e.fillRect(0, t.height / 2, t.width, t.height / 2);
-        }
-        var ae = l(() => {
-          'use strict';
-        });
-        function se(e, t) {
-          let { me: o, mapData: n } = r;
-          if (!o || !n) return;
-          let i = Math.PI / 3;
-          for (let a = 0; a < t.width; a++) {
-            let s = o.dir - i / 2 + (a / t.width) * i,
-              c = 0,
-              m = !1;
-            for (; !m && c < 20; ) {
-              c += 0.05;
-              let f = o.x + Math.cos(s) * c,
-                g = o.y + Math.sin(s) * c,
-                y = Math.floor(f),
-                w = Math.floor(g);
-              n[w]?.[y] === 1 && (m = !0);
-            }
-            if (m) {
-              let f = c * Math.cos(s - o.dir);
-              D(a, f);
-              let g = t.height / f,
-                y = Math.max(0.2, 1 - c / 10),
-                w = Math.floor(136 * y);
-              (e.fillStyle = `rgb(${w}, ${w}, ${w})`), e.fillRect(a, t.height / 2 - g / 2, 1, g);
-            } else D(a, 1 / 0);
-          }
-        }
-        var ie = l(() => {
-          'use strict';
-          d();
-        });
-        function Ae(e) {
-          let n = document.createElement('canvas');
-          (n.width = 32), (n.height = 64);
-          let i = n.getContext('2d');
-          return (i.fillStyle = e), i.fillRect(0, 0, 32, 64), n;
-        }
-        function ce(e, t) {
-          return r.spriteTextures[e] || (r.spriteTextures[e] = Ae(t)), r.spriteTextures[e];
-        }
-        var le = l(() => {
-          'use strict';
-          d();
-        });
-        function fe(e, t) {
-          let { me: o, otherPlayers: n } = r;
-          if (!o) return;
-          let i = Math.PI / 3,
-            a = t.width / (2 * Math.tan(i / 2)),
-            s = 0.8,
-            c = s / 2;
-          for (let m in n) {
-            let f = n[m],
-              g = f.x - o.x,
-              y = f.y - o.y,
-              w = Math.sqrt(g * g + y * y),
-              k = Math.atan2(y, g) - o.dir;
-            if ((k > Math.PI && (k -= 2 * Math.PI), k < -Math.PI && (k += 2 * Math.PI), Math.abs(k) > i / 2)) continue;
-            let T = w * Math.cos(k),
-              E = t.width / 2 + Math.tan(k) * a,
-              P = (t.height / T) * s,
-              Y = P * (32 / 64),
-              F = t.height / 2 + (c / T) * a - P,
-              ve = Math.floor(E - Y / 2),
-              Ie = Math.floor(E + Y / 2),
-              Le = ce(f.id, f.color);
-            for (let p = ve; p < Ie; p++)
-              p < 0 || p >= t.width || T >= H(p) || e.drawImage(Le, 0, 0, 32, 64, p, F, 1, P);
-            if (f.username && T < 1 / 0) {
-              let p = Math.max(10, P * 0.2);
-              (e.imageSmoothingEnabled = !1),
-                (e.font = `${p}px Arial`),
-                (e.textAlign = 'center'),
-                (e.textBaseline = 'bottom');
-              let G = E,
-                Z = F - 5,
-                L = Math.floor(E);
-              L >= 0 &&
-                L < t.width &&
-                T < H(L) &&
-                ((e.strokeStyle = 'black'),
-                (e.lineWidth = 3),
-                e.strokeText(f.username, G, Z),
-                (e.fillStyle = 'white'),
-                e.fillText(f.username, G, Z));
-            }
-          }
-        }
-        var me = l(() => {
-          'use strict';
-          d();
-          le();
-        });
-        function ue(e) {
-          (u = e), (b = u.getContext('2d')), (u.width = 640), (u.height = 400), ee(u.width);
-        }
-        function he() {
-          b.clearRect(0, 0, u.width, u.height), re(b, u), r.mapData && se(b, u), r.me && fe(b, u);
-        }
-        var b,
-          u,
-          de = l(() => {
-            'use strict';
-            d();
-            ae();
-            ie();
-            me();
-          });
-        function ge(e, t) {
-          let o = Math.floor(e),
-            n = Math.floor(t);
-          return r.mapData[n]?.[o] !== 1;
-        }
-        function pe() {
-          let e = !1,
-            { me: t } = r,
-            o = 0.05,
-            n = 0.05,
-            i = t.x,
-            a = t.y,
-            s = t.dir;
-          if ((M.arrowleft && ((s -= n), (e = !0)), M.arrowright && ((s += n), (e = !0)), M.arrowup)) {
-            let c = t.x + Math.cos(t.dir) * o,
-              m = t.y + Math.sin(t.dir) * o;
-            ge(c, m) && ((i = c), (a = m), (e = !0));
-          }
-          if (M.arrowdown) {
-            let c = t.x - Math.cos(t.dir) * o,
-              m = t.y - Math.sin(t.dir) * o;
-            ge(c, m) && ((i = c), (a = m), (e = !0));
-          }
-          e && (h({ x: i, y: a, dir: s }), N(r.me));
-        }
-        function ye() {
-          window.addEventListener('keydown', (e) => {
-            M[e.key.toLowerCase()] = !0;
-          }),
-            window.addEventListener('keyup', (e) => {
-              M[e.key.toLowerCase()] = !1;
-            });
-        }
-        var M,
-          we = l(() => {
-            'use strict';
-            d();
-            W();
-            M = {};
-          });
-        async function X() {
-          try {
-            let t = document.getElementById('gameCanvas');
-            if (!t)
-              throw new Error('\uCE94\uBC84\uC2A4\uB97C \uCC3E\uC744 \uC218 \uC5C6\uC2B5\uB2C8\uB2E4 (#gameCanvas).');
-            ue(t), ye();
-            let o = await K();
-            if (
-              (_(o),
-              A(),
-              j(),
-              te((n, i) => {
-                q(n, i);
-              }),
-              !ke)
-            ) {
-              let n = function () {
-                pe(), he(), requestAnimationFrame(n);
-              };
-              var e = n;
-              (ke = !0), n();
-            }
-          } catch (t) {
-            console.error('\uAC8C\uC784 \uC2DC\uC791 \uC2E4\uD328:', t);
-          }
-        }
-        var ke,
-          Me = l(() => {
-            'use strict';
-            Q();
-            d();
-            ne();
-            de();
-            we();
-            U();
-            z();
-            ke = !1;
-          });
-        function Te() {
-          (document.querySelector('.login-form').style.display = 'none'),
-            (document.querySelector('.game-container').style.display = 'block'),
-            (document.querySelector('.user-list-container').style.display = 'block'),
-            (document.querySelector('.chat-container').style.display = 'flex');
-        }
-        function Ne() {
-          (document.querySelector('.login-form').style.display = 'block'),
-            (document.querySelector('.game-container').style.display = 'none'),
-            (document.querySelector('.user-list-container').style.display = 'none'),
-            (document.querySelector('.chat-container').style.display = 'none');
-        }
-        function be(e, t) {
-          sessionStorage.setItem('accessToken', e), sessionStorage.setItem('refreshToken', t);
-        }
-        function We() {
-          sessionStorage.clear();
-        }
-        function J() {
-          let e = sessionStorage.getItem('accessToken'),
-            t = sessionStorage.getItem('refreshToken');
-          return e && t ? { accessToken: e, refreshToken: t } : null;
-        }
-        async function Se() {
-          let e = J();
-          if (!e) return null;
-          let t = await fetch('http://localhost:3000/auth/me', {
-            headers: { Authorization: `Bearer ${e.accessToken}` },
-          });
-          if (!t.ok) return null;
-          let o = await t.json();
-          return o.success && o.data ? o.data : null;
-        }
-        async function xe(e) {
-          let t = await fetch('http://localhost:3000/auth/me', { headers: { Authorization: `Bearer ${e}` } });
-          return t.ok ? (await t.json()).success : !1;
-        }
-        async function Re(e) {
-          let t = await fetch('http://localhost:3000/auth/refresh', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ refreshToken: e }),
-            }),
-            o = await t.json();
-          return t.ok && o.success && o.data?.accessToken && o.data?.refreshToken
-            ? (be(o.data.accessToken, o.data.refreshToken), !0)
-            : !1;
-        }
-        async function Ee(e, t) {
-          let o = await fetch('http://localhost:3000/auth/signin', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ username: e, password: t }),
-            }),
-            n = await o.json();
-          return o.status === 404
-            ? (await Ue(e, t), Ee(e, t))
-            : o.ok && n.success && n.data?.accessToken && n.data?.refreshToken
-            ? (be(n.data.accessToken, n.data.refreshToken), !0)
-            : !1;
-        }
-        async function Ue(e, t) {
-          let o = await fetch('http://localhost:3000/auth/signup', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ username: e, password: t }),
-            }),
-            n = await o.json();
-          if (!o.ok || !n.success) throw new Error('\uD68C\uC6D0\uAC00\uC785 \uC2E4\uD328');
-        }
-        async function $e() {
-          let e = J();
-          if (!e) return !1;
-          if (await xe(e.accessToken)) return !0;
-          if (await Re(e.refreshToken)) {
-            let n = J();
-            if (n) return xe(n.accessToken);
-          }
-          return We(), !1;
-        }
-        async function Pe() {
-          let e = document.getElementById('signin'),
-            t = document.getElementById('username'),
-            o = document.getElementById('password');
-          if (await $e()) {
-            let n = await Se();
-            n && ((r.me.id = n.id), (r.me.username = n.username)), Te(), await X();
-            return;
-          }
-          Ne(),
-            e.addEventListener('click', async () => {
-              let n = t.value.trim(),
-                i = o.value.trim();
-              if (!n || !i) {
-                alert('Username\uACFC Password\uB97C \uC785\uB825\uD558\uC138\uC694.');
-                return;
-              }
-              if (await Ee(n, i)) {
-                let s = await Se();
-                s && ((r.me.id = s.id), (r.me.username = s.username)), Te(), await X();
-              } else alert('\uB85C\uADF8\uC778 \uC2E4\uD328');
-            });
-        }
-        var Ce = l(() => {
-          'use strict';
-          Me();
-          d();
-        });
-        var je = Be(() => {
-          Ce();
-          window.addEventListener('DOMContentLoaded', () => {
-            Pe();
-          });
-        });
-        je();
-      })();
-    </script>
-  </body>
+    <div class="chat-container">
+      <h3>채팅</h3>
+
+      <div class="chat-section">
+        <h4>전체</h4>
+        <div id="chat-box-global" class="chat-box"></div>
+      </div>
+
+      <div class="chat-section">
+        <h4>지역</h4>
+        <div id="chat-box-local" class="chat-box"></div>
+      </div>
+
+      <div class="chat-input-row">
+        <select id="chat-scope">
+          <option value="global">전체</option>
+          <option value="local">지역</option>
+        </select>
+        <input type="text" id="chat-input" placeholder="메시지를 입력하세요" />
+        <button id="chat-send">보내기</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+"use strict";(()=>{var l=(e,t)=>()=>(e&&(t=e(e=0)),t);var Be=(e,t)=>()=>(t||e((t={exports:{}}).exports,t),t.exports);function De(){return sessionStorage.getItem("accessToken")}async function K(){let e=De();if(!e)throw new Error("\uB85C\uADF8\uC778\uC774 \uD544\uC694\uD569\uB2C8\uB2E4.");let t=await fetch("http://api.messagoom.online/game/maps",{headers:{Authorization:`Bearer ${e}`}});if(t.status===401)throw new Error("\uC778\uC99D\uC774 \uB9CC\uB8CC\uB418\uC5C8\uC2B5\uB2C8\uB2E4.");let n=await t.json();if(!n.success||!n.data)throw new Error(n.error?.message||"\uB9F5 \uB370\uC774\uD130\uB97C \uBD88\uB7EC\uC624\uB294 \uB370 \uC2E4\uD328\uD588\uC2B5\uB2C8\uB2E4.");return n.data[0].data}var Q=l(()=>{"use strict"});function d(e){r.me={...r.me,...e,username:e.username??r.me.username}}function B(e){if(e.id===r.me.id)return;let t=r.otherPlayers[e.id];r.otherPlayers[e.id]={...t??{},...e,username:e.username??t?.username??""}}function V(e){delete r.otherPlayers[e],delete r.spriteTextures[e]}function _(e){r.mapData=e;for(let t=0;t<e.length;t++)for(let n=0;n<e[t].length;n++)if(e[t][n]===2){d({x:n+.5,y:t+.5});return}}function ee(e){r.zBuffer=new Array(e).fill(1/0)}function D(e,t){r.zBuffer[e]=t}function H(e){return r.zBuffer[e]}var r,h=l(()=>{"use strict";r={me:{id:"",username:"",x:0,y:0,dir:0,color:"red"},otherPlayers:{},mapData:[],zBuffer:[],spriteTextures:{}}});function C(){return sessionStorage.getItem("accessToken")}function v(e,t,n,o,i){let a=new WebSocket(e);return a.onopen=()=>t(a),a.onmessage=s=>{try{let c=JSON.parse(s.data);n(c)}catch{console.error("Failed to parse WebSocket message:",s.data)}},a.onclose=()=>o?.(),a.onerror=s=>i?.(s),a}var O=l(()=>{"use strict"});function A(){S=v("ws://api.messagoom.online/game",e=>{let t=C();t?e.send(JSON.stringify({type:"auth",token:t})):e.close()},He,()=>{},()=>{})}function He(e){switch(e.type){case"auth":case"reauth":e.success?(I=e.id,d(e)):S.close();break;case"state":e.players.forEach(n=>{n.id===I?d(n):B(n)});break;case"playerMove":e.id===I?d(e):B(e);break;case"selfUpdate":d(e);break;case"nearbyPlayers":let t={};e.players.forEach(n=>{n.id===I?d(n):t[n.id]=n}),r.otherPlayers=t;break;case"leave":V(e.id);break}}function N(e){S&&S.readyState===WebSocket.OPEN&&e.id&&S.send(JSON.stringify({type:"move",id:e.id,username:e.username,x:e.x,y:e.y,dir:e.dir}))}var I,S,W=l(()=>{"use strict";h();O();I=""});function te(e){let t=document.getElementById("chat-input"),n=document.getElementById("chat-send"),o=document.getElementById("chat-scope");if(!t||!n||!o||typeof e!="function")return;let i=()=>{let a=t.value.trim(),s=o.value||"global";a&&(e(a,s),t.value="")};n.addEventListener("click",i),t.addEventListener("keypress",a=>{a.key==="Enter"&&i()})}function R(e,t,n,o="global"){let i=o==="global"?"chat-box-global":"chat-box-local",a=document.getElementById(i);if(!a)return;let s=document.createElement("div");e==="\uAD00\uB9AC\uC790"?(s.textContent=t,s.className="admin-message"):(s.textContent=`${n?"\uB098":e}: ${t}`,s.className=n?"my-message":"other-message"),a.appendChild(s),a.scrollTop=a.scrollHeight}var U=l(()=>{"use strict"});function j(){x=v("ws://api.messagoom.online/chat",e=>{console.log("Chat connected. Authenticating...");let t=C();t?e.send(JSON.stringify({type:"auth",token:t})):(console.error("Chat authentication failed: Token not found."),e.close())},Oe,()=>console.log("Chat connection closed."),e=>console.error("Chat WebSocket Error:",e))}function Oe(e){switch(e.type){case"auth":e.success?(ne=e.id,$=e.username,console.log(`Chat authenticated. ID: ${ne}, Username: ${$}`)):(console.error("Chat authentication failed:",e.error),x.close());break;case"chat":if(e.from&&e.msg){let t=e.scope==="local"?"local":"global";if(e.from==="\uAD00\uB9AC\uC790"){R("\uAD00\uB9AC\uC790",e.msg,!1,t);return}let n=e.from===$;R(e.from,e.msg,n,t)}else console.warn("Malformed chat message received:",e);break;default:console.log("Unhandled chat message:",e);break}}function q(e,t="global"){if(x&&x.readyState===WebSocket.OPEN){let n={type:"chat",scope:t,msg:e};x.send(JSON.stringify(n))}}var ne,$,x,X=l(()=>{"use strict";U();O();ne="",$=""});var oe=l(()=>{"use strict";W();X()});function re(e,t){e.fillStyle="#87CEEB",e.fillRect(0,0,t.width,t.height/2),e.fillStyle="#444",e.fillRect(0,t.height/2,t.width,t.height/2)}var ae=l(()=>{"use strict"});function se(e,t){let{me:n,mapData:o}=r;if(!n||!o)return;let i=Math.PI/3;for(let a=0;a<t.width;a++){let s=n.dir-i/2+a/t.width*i,c=0,f=!1;for(;!f&&c<20;){c+=.05;let m=n.x+Math.cos(s)*c,g=n.y+Math.sin(s)*c,y=Math.floor(m),w=Math.floor(g);o[w]?.[y]===1&&(f=!0)}if(f){let m=c*Math.cos(s-n.dir);D(a,m);let g=t.height/m,y=Math.max(.2,1-c/10),w=Math.floor(136*y);e.fillStyle=`rgb(${w}, ${w}, ${w})`,e.fillRect(a,t.height/2-g/2,1,g)}else D(a,1/0)}}var ie=l(()=>{"use strict";h()});function Ae(e){let o=document.createElement("canvas");o.width=32,o.height=64;let i=o.getContext("2d");return i.fillStyle=e,i.fillRect(0,0,32,64),o}function ce(e,t){return r.spriteTextures[e]||(r.spriteTextures[e]=Ae(t)),r.spriteTextures[e]}var le=l(()=>{"use strict";h()});function me(e,t){let{me:n,otherPlayers:o}=r;if(!n)return;let i=Math.PI/3,a=t.width/(2*Math.tan(i/2)),s=.8,c=s/2;for(let f in o){let m=o[f],g=m.x-n.x,y=m.y-n.y,w=Math.sqrt(g*g+y*y),k=Math.atan2(y,g)-n.dir;if(k>Math.PI&&(k-=2*Math.PI),k<-Math.PI&&(k+=2*Math.PI),Math.abs(k)>i/2)continue;let T=w*Math.cos(k),E=t.width/2+Math.tan(k)*a,P=t.height/T*s,Y=P*(32/64),F=t.height/2+c/T*a-P,ve=Math.floor(E-Y/2),Ie=Math.floor(E+Y/2),Le=ce(m.id,m.color);for(let p=ve;p<Ie;p++)p<0||p>=t.width||T>=H(p)||e.drawImage(Le,0,0,32,64,p,F,1,P);if(m.username&&T<1/0){let p=Math.max(10,P*.2);e.imageSmoothingEnabled=!1,e.font=`${p}px Arial`,e.textAlign="center",e.textBaseline="bottom";let G=E,Z=F-5,L=Math.floor(E);L>=0&&L<t.width&&T<H(L)&&(e.strokeStyle="black",e.lineWidth=3,e.strokeText(m.username,G,Z),e.fillStyle="white",e.fillText(m.username,G,Z))}}}var fe=l(()=>{"use strict";h();le()});function ue(e){u=e,b=u.getContext("2d"),u.width=640,u.height=400,ee(u.width)}function de(){b.clearRect(0,0,u.width,u.height),re(b,u),r.mapData&&se(b,u),r.me&&me(b,u)}var b,u,he=l(()=>{"use strict";h();ae();ie();fe()});function ge(e,t){let n=Math.floor(e),o=Math.floor(t);return r.mapData[o]?.[n]!==1}function pe(){let e=!1,{me:t}=r,n=.05,o=.05,i=t.x,a=t.y,s=t.dir;if(M.arrowleft&&(s-=o,e=!0),M.arrowright&&(s+=o,e=!0),M.arrowup){let c=t.x+Math.cos(t.dir)*n,f=t.y+Math.sin(t.dir)*n;ge(c,f)&&(i=c,a=f,e=!0)}if(M.arrowdown){let c=t.x-Math.cos(t.dir)*n,f=t.y-Math.sin(t.dir)*n;ge(c,f)&&(i=c,a=f,e=!0)}e&&(d({x:i,y:a,dir:s}),N(r.me))}function ye(){window.addEventListener("keydown",e=>{M[e.key.toLowerCase()]=!0}),window.addEventListener("keyup",e=>{M[e.key.toLowerCase()]=!1})}var M,we=l(()=>{"use strict";h();W();M={}});async function z(){try{let t=document.getElementById("gameCanvas");if(!t)throw new Error("\uCE94\uBC84\uC2A4\uB97C \uCC3E\uC744 \uC218 \uC5C6\uC2B5\uB2C8\uB2E4 (#gameCanvas).");ue(t),ye();let n=await K();if(_(n),A(),j(),te((o,i)=>{q(o,i)}),!ke){let o=function(){pe(),de(),requestAnimationFrame(o)};var e=o;ke=!0,o()}}catch(t){console.error("\uAC8C\uC784 \uC2DC\uC791 \uC2E4\uD328:",t)}}var ke,Me=l(()=>{"use strict";Q();h();oe();he();we();U();X();ke=!1});function Te(){document.querySelector(".login-form").style.display="none",document.querySelector(".game-container").style.display="block",document.querySelector(".user-list-container").style.display="block",document.querySelector(".chat-container").style.display="flex"}function Ne(){document.querySelector(".login-form").style.display="block",document.querySelector(".game-container").style.display="none",document.querySelector(".user-list-container").style.display="none",document.querySelector(".chat-container").style.display="none"}function be(e,t){sessionStorage.setItem("accessToken",e),sessionStorage.setItem("refreshToken",t)}function We(){sessionStorage.clear()}function J(){let e=sessionStorage.getItem("accessToken"),t=sessionStorage.getItem("refreshToken");return e&&t?{accessToken:e,refreshToken:t}:null}async function Se(){let e=J();if(!e)return null;let t=await fetch("http://api.messagoom.online/auth/me",{headers:{Authorization:`Bearer ${e.accessToken}`}});if(!t.ok)return null;let n=await t.json();return n.success&&n.data?n.data:null}async function xe(e){let t=await fetch("http://api.messagoom.online/auth/me",{headers:{Authorization:`Bearer ${e}`}});return t.ok?(await t.json()).success:!1}async function Re(e){let t=await fetch("http://api.messagoom.online/auth/refresh",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({refreshToken:e})}),n=await t.json();return t.ok&&n.success&&n.data?.accessToken&&n.data?.refreshToken?(be(n.data.accessToken,n.data.refreshToken),!0):!1}async function Ee(e,t){let n=await fetch("http://api.messagoom.online/auth/signin",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({username:e,password:t})}),o=await n.json();return n.status===404?(await Ue(e,t),Ee(e,t)):n.ok&&o.success&&o.data?.accessToken&&o.data?.refreshToken?(be(o.data.accessToken,o.data.refreshToken),!0):!1}async function Ue(e,t){let n=await fetch("http://api.messagoom.online/auth/signup",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({username:e,password:t})}),o=await n.json();if(!n.ok||!o.success)throw new Error("\uD68C\uC6D0\uAC00\uC785 \uC2E4\uD328")}async function $e(){let e=J();if(!e)return!1;if(await xe(e.accessToken))return!0;if(await Re(e.refreshToken)){let o=J();if(o)return xe(o.accessToken)}return We(),!1}async function Pe(){let e=document.getElementById("signin"),t=document.getElementById("username"),n=document.getElementById("password");if(await $e()){let o=await Se();o&&(r.me.id=o.id,r.me.username=o.username),Te(),await z();return}Ne(),e.addEventListener("click",async()=>{let o=t.value.trim(),i=n.value.trim();if(!o||!i){alert("Username\uACFC Password\uB97C \uC785\uB825\uD558\uC138\uC694.");return}if(await Ee(o,i)){let s=await Se();s&&(r.me.id=s.id,r.me.username=s.username),Te(),await z()}else alert("\uB85C\uADF8\uC778 \uC2E4\uD328")})}var Ce=l(()=>{"use strict";Me();h()});var je=Be(()=>{Ce();window.addEventListener("DOMContentLoaded",()=>{Pe()})});je();})();
+
+  </script>
+</body>
 </html>

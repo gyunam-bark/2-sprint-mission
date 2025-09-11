@@ -38,7 +38,7 @@ async function fetchMyProfile() {
   const tokens = getAuthTokens();
   if (!tokens) return null;
 
-  const resp = await fetch('http://localhost:3000/auth/me', {
+  const resp = await fetch('http://api.messagoom.online/auth/me', {
     headers: { Authorization: `Bearer ${tokens.accessToken}` },
   });
 
@@ -53,7 +53,7 @@ async function fetchMyProfile() {
 
 // 토큰 검증
 async function validateAccessToken(accessToken: string): Promise<boolean> {
-  const resp = await fetch('http://localhost:3000/auth/me', {
+  const resp = await fetch('http://api.messagoom.online/auth/me', {
     headers: { Authorization: `Bearer ${accessToken}` },
   });
   if (resp.ok) {
@@ -65,7 +65,7 @@ async function validateAccessToken(accessToken: string): Promise<boolean> {
 
 // 토큰 갱신
 async function refreshTokens(refreshToken: string): Promise<boolean> {
-  const resp = await fetch('http://localhost:3000/auth/refresh', {
+  const resp = await fetch('http://api.messagoom.online/auth/refresh', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ refreshToken }),
@@ -80,7 +80,7 @@ async function refreshTokens(refreshToken: string): Promise<boolean> {
 
 // 로그인/회원가입
 async function trySignIn(username: string, password: string): Promise<boolean> {
-  const resp = await fetch('http://localhost:3000/auth/signin', {
+  const resp = await fetch('http://api.messagoom.online/auth/signin', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ username, password }),
@@ -101,7 +101,7 @@ async function trySignIn(username: string, password: string): Promise<boolean> {
 }
 
 async function trySignUp(username: string, password: string) {
-  const resp = await fetch('http://localhost:3000/auth/signup', {
+  const resp = await fetch('http://api.messagoom.online/auth/signup', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ username, password }),
@@ -139,7 +139,7 @@ export async function initAuth(): Promise<void> {
     const me = await fetchMyProfile();
     if (me) {
       gameState.me.id = me.id;
-      gameState.me.username = me.username; // ✅ username 세팅
+      gameState.me.username = me.username;
     }
     showGameUI();
     await startGame();
