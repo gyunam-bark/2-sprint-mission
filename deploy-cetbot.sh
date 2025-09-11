@@ -59,10 +59,12 @@ curl -s http://api.messagoom.online/.well-known/acme-challenge/test.txt || {
   exit 1
 }
 
-echo "=== Step 4: Certbot 최초 발급 실행 (IPv4 강제) ==="
-docker compose run --rm certbot certonly -4 \
+echo "=== Step 4: Certbot 최초 발급 실행 (http-01 강제) ==="
+docker compose run --rm certbot certonly \
   --webroot -w $WEBROOT \
   "${DOMAINS[@]}" \
+  --preferred-challenges http-01 \
+  --http-01-port 80 \
   --non-interactive \
   --agree-tos \
   -m "$EMAIL" \
