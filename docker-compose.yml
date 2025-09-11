@@ -81,6 +81,9 @@ services:
   certbot:
     image: certbot/certbot
     container_name: certbot
+    dns:
+      - 8.8.8.8
+      - 1.1.1.1
     volumes:
       - certbot-etc:/etc/letsencrypt
       - ./www:/usr/share/nginx/html
