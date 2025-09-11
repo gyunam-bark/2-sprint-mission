@@ -15,7 +15,7 @@ FROM node:20-alpine AS runner
 WORKDIR /app
 
 COPY package*.json ./
-RUN npm ci --omit=dev
+RUN npm ci   # <-- devDependencies까지 설치 (drizzle-kit 필요)
 
 COPY --from=builder /app/dist ./dist
 COPY entrypoint.sh /entrypoint.sh
