@@ -53,9 +53,9 @@ sleep 3
 CONTENT=$(curl -s $TEST_FILE_URL)
 
 if [ "$CONTENT" = "$EXPECTED_CONTENT" ]; then
-    echo "챌린지 테스트 성공!"
+    echo "✅ 챌린지 테스트 성공!"
 else
-    echo "ERROR: 챌린지 테스트 실패. Nginx 설정을 확인하세요."
+    echo "❌ ERROR: 챌린지 테스트 실패. Nginx 설정을 확인하세요."
     echo "기대했던 내용: $EXPECTED_CONTENT"
     echo "실제 수신된 내용: $CONTENT"
     exit 1
@@ -85,7 +85,8 @@ server {
     location / { return 301 https://$host$request_uri; }
 }
 server {
-    listen 443 ssl http2;
+    listen 443 ssl;
+    http2 on;
     server_name messagoom.online www.messagoom.online;
     ssl_certificate /etc/letsencrypt/live/messagoom.online/fullchain.pem;
     ssl_certificate_key /etc/letsencrypt/live/messagoom.online/privkey.pem;
@@ -102,12 +103,13 @@ server {
     location / { return 301 https://$host$request_uri; }
 }
 server {
-    listen 443 ssl http2;
+    listen 443 ssl;
+    http2 on;
     server_name api.messagoom.online;
     ssl_certificate /etc/letsencrypt/live/messagoom.online/fullchain.pem;
     ssl_certificate_key /etc/letsencrypt/live/messagoom.online/privkey.pem;
     location / {
-        proxy_pass http://gateway-service:3000;
+        proxy_pass http://gateway:3000;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
@@ -130,4 +132,4 @@ echo "모든 도메인 HTTPS 연결 확인 완료."
 echo "=== Step 8: Certbot 자동 갱신 서비스 활성화 ==="
 docker compose up -d certbot
 
-echo "SSL 인증서 발급 및 HTTPS 설정, 자동 갱신까지 모두 완료되었습니다."
+echo "🎉 SSL 인증서 발급 및 HTTPS 설정, 자동 갱신까지 모두 완료되었습니다."
