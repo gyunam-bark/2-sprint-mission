@@ -71,9 +71,14 @@ docker compose run --rm certbot certonly \
   -v
 
 echo "=== Step 5: 발급 후 conf 작성 ==="
-cat > $CONF_DIR/www.conf <<'EOF'
-resolver 127.0.0.11 ipv6=off;
 
+# --- [추가] resolver 설정을 별도 파일로 분리 ---
+cat > $CONF_DIR/_main.conf <<'EOF'
+resolver 127.0.0.11 ipv6=off;
+EOF
+
+# --- [수정] www.conf에서 resolver 라인 제거 ---
+cat > $CONF_DIR/www.conf <<'EOF'
 server {
     listen 80;
     server_name messagoom.online www.messagoom.online;
@@ -103,9 +108,8 @@ server {
 }
 EOF
 
+# --- [수정] api.conf에서 resolver 라인 제거 ---
 cat > $CONF_DIR/api.conf <<'EOF'
-resolver 127.0.0.11 ipv6=off;
-
 server {
     listen 80;
     server_name api.messagoom.online;
