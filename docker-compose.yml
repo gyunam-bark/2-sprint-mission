@@ -79,7 +79,7 @@ services:
       - app-network
 
   certbot:
-    image: certbot/certbot
+    image: certbot/certbot:v2.10.0
     container_name: certbot
     dns:
       - 8.8.8.8
