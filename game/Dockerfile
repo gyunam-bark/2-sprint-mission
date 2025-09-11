@@ -1,3 +1,4 @@
+# --- build stage ---
 FROM node:20-alpine AS builder
 WORKDIR /app
 
@@ -9,7 +10,7 @@ RUN npm install
 COPY . .
 RUN npm run build
 
-
+# --- runtime stage ---
 FROM node:20-alpine AS runner
 WORKDIR /app
 
@@ -17,9 +18,8 @@ COPY package*.json ./
 RUN npm ci --omit=dev
 
 COPY --from=builder /app/dist ./dist
-COPY .env .env
-COPY seed.sql seed.sh ./   
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
 
 EXPOSE 3002
-
-CMD ["sh", "-c", "sh /app/seed.sh && node dist/index.js"]
+ENTRYPOINT ["/entrypoint.sh"]

@@ -89,10 +89,13 @@ export function setupChatWebSocket(server: Server) {
             });
           } else if (scope === 'local') {
             try {
-              const resp = await axios.get<NearbyResponse>(`${config.external.game}/players/nearby/${current.id}`, {
-                params: { radius: 1 },
-                headers: { Authorization: `Bearer ${current.token}` },
-              });
+              const resp = await axios.get<NearbyResponse>(
+                `${config.external.gateway}/game/players/nearby/${current.id}`,
+                {
+                  params: { radius: 1 },
+                  headers: { Authorization: `Bearer ${current.token}` },
+                }
+              );
 
               console.log(`[서버] 로컬 메시지 대상자 조회:`, resp.data);
 
