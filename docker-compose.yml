@@ -69,8 +69,8 @@ services:
       - '443:443'
     volumes:
       - ./nginx/conf.d:/etc/nginx/conf.d:ro
-      - ./www:/usr/share/nginx/html:ro
-      - certbot-etc:/etc/letsencrypt
+      - certbot-www:/usr/share/nginx/html
+      - certbot-etc:/etc/letsencrypt:ro
     depends_on:
       - gateway
       - chat
@@ -81,26 +81,17 @@ services:
   certbot:
     image: certbot/certbot:v2.10.0
     container_name: certbot
-    dns:
-      - 8.8.8.8
-      - 1.1.1.1
     volumes:
+      - certbot-www:/usr/share/nginx/html
       - certbot-etc:/etc/letsencrypt
-      - ./www:/usr/share/nginx/html
-    entrypoint: >
-      sh -c "trap exit TERM; while :; do
-             certbot renew --webroot -w /usr/share/nginx/html --quiet;
-             sleep 12h;
-             done"
+    command: renew --webroot -w /usr/share/nginx/html --quiet
     networks:
       - app-network
-
-    sysctls:
-      net.ipv6.conf.all.disable_ipv6: 1
 
 volumes:
   db-data:
   certbot-etc:
+  certbot-www:
 
 networks:
   app-network:
