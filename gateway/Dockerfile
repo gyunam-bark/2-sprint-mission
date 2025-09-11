@@ -8,11 +8,6 @@ COPY package*.json ./
 RUN npm install
 
 COPY . .
-
-RUN npm run drizzle:generate
-RUN npm run drizzle:migrate
-RUN npm run seed
-
 RUN npm run build
 
 # --- runtime stage ---
@@ -20,7 +15,7 @@ FROM node:20-alpine AS runner
 WORKDIR /app
 
 COPY package*.json ./
-RUN npm ci --omit=dev
+RUN npm ci   # <-- devDependencies까지 설치 (drizzle-kit 필요)
 
 COPY --from=builder /app/dist ./dist
 COPY entrypoint.sh /entrypoint.sh
