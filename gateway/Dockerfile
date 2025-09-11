@@ -8,6 +8,11 @@ COPY package*.json ./
 RUN npm install
 
 COPY . .
+
+RUN npm run drizzle:generate
+RUN npm run drizzle:migrate
+RUN npm run seed
+
 RUN npm run build
 
 # --- runtime stage ---
