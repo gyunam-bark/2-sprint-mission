@@ -34,5 +34,9 @@ jobs:
             echo "${{ secrets.CHAT_ENV }}" > chat/.env
             echo "${{ secrets.GAME_ENV }}" > game/.env
 
+            # 도커 전체 초기화 (이미지/볼륨 포함)
+            docker system prune -af --volumes || true
+
+            # 새로 빌드 & 실행
             docker compose build
             docker compose up -d
