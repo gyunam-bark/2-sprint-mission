@@ -3,13 +3,13 @@ import { messages } from '../db/schema';
 import { eq, and, gte, lte, asc, desc } from 'drizzle-orm';
 import { SaveMessageRequest, GetMessageListRequest } from '../types/message.type';
 
-export const saveMessage = async (data: SaveMessageRequest): Promise<void> => {
+export async function saveMessage(data: SaveMessageRequest): Promise<void> {
   await db.insert(messages).values({
     senderId: data.senderId,
     scope: data.scope,
     message: data.message,
   });
-};
+}
 
 export async function getMessageList(params: GetMessageListRequest) {
   const { limit = 50, offset = 0, scope, senderId, from, to, order = 'asc' } = params;

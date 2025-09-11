@@ -1,3 +1,3 @@
-export const getHealthCheck = async () => {
+export async function getHealthCheck() {
   return { status: 'ok', service: 'chat' };
-};
+}

@@ -2,7 +2,7 @@ import { Context, Next } from 'koa';
 import { verifyAccessToken } from '../utils/jwt.util';
 import { errorResponse } from '../utils/response.util';
 
-export const authMiddleware = async (ctx: Context, next: Next) => {
+export async function authMiddleware(ctx: Context, next: Next) {
   // 1. Authorization 헤더 우선 확인
   const authHeader = ctx.headers['authorization'];
   let token: string | undefined;
@@ -31,4 +31,4 @@ export const authMiddleware = async (ctx: Context, next: Next) => {
     ctx.status = 401;
     ctx.body = errorResponse(401, 'Invalid token');
   }
-};
+}
