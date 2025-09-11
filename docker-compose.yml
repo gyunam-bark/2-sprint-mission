@@ -10,6 +10,8 @@ services:
     depends_on:
       db:
         condition: service_healthy
+    networks:
+      - app-network
 
   chat:
     build: ./chat
@@ -22,6 +24,8 @@ services:
     depends_on:
       db:
         condition: service_healthy
+    networks:
+      - app-network
 
   game:
     build: ./game
@@ -34,6 +38,8 @@ services:
     depends_on:
       db:
         condition: service_healthy
+    networks:
+      - app-network
 
   db:
     image: postgres:16-alpine
@@ -52,6 +58,8 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+    networks:
+      - app-network
 
   nginx:
     image: nginx:alpine
@@ -67,6 +75,8 @@ services:
       - gateway
       - chat
       - game
+    networks:
+      - app-network
 
   certbot:
     image: certbot/certbot
@@ -79,7 +89,13 @@ services:
              certbot renew --webroot -w /usr/share/nginx/html --quiet;
              sleep 12h;
              done"
+    networks:
+      - app-network
 
 volumes:
   db-data:
   certbot-etc:
+
+networks:
+  app-network:
+    driver: bridge
