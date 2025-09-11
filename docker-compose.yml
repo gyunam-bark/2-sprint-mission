@@ -89,7 +89,7 @@ services:
       - ./www:/usr/share/nginx/html
     entrypoint: >
       sh -c "trap exit TERM; while :; do
-             certbot renew -4 --webroot -w /usr/share/nginx/html --quiet;
+             certbot renew --webroot -w /usr/share/nginx/html --quiet;
              sleep 12h;
              done"
     networks:
