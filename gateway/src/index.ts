@@ -12,11 +12,11 @@ const wsProxy = httpProxy.createProxyServer({});
 server.on('upgrade', (req, socket, head) => {
   if (req.url?.startsWith('/chat')) {
     wsProxy.ws(req, socket, head, {
-      target: config.external.chat || 'http://localhost:3001',
+      target: config.external.chat || 'http://chat:3001',
     });
   } else if (req.url?.startsWith('/game')) {
     wsProxy.ws(req, socket, head, {
-      target: config.external.game || 'http://localhost:3002',
+      target: config.external.game || 'http://game:3002',
     });
   } else {
     socket.destroy();

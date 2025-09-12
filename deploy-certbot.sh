@@ -7,7 +7,7 @@ EMAIL="gyunam.bark@gmail.com"
 DOMAINS=(-d messagoom.online -d www.messagoom.online -d api.messagoom.online -d deploy.messagoom.online)
 WEBROOT="/var/www/certbot"
 CONF_DIR="./nginx/conf.d"
-NGINX_SERVICE="nginx"
+NGINX_SERVICE="nginx" 
 CERT_PATH="/etc/letsencrypt/live/messagoom.online/fullchain.pem"
 
 # --- 스크립트 시작 ---
@@ -89,7 +89,6 @@ fi
 
 echo "=== Step 5: HTTPS 적용을 위한 Nginx 설정 작성 ==="
 cat > $CONF_DIR/_main.conf <<'EOF'
-resolver 127.0.0.11 valid=10s;
 EOF
 cat > $CONF_DIR/www.conf <<'EOF'
 server {
@@ -125,10 +124,25 @@ server {
     ssl_certificate /etc/letsencrypt/live/messagoom.online/fullchain.pem;
     ssl_certificate_key /etc/letsencrypt/live/messagoom.online/privkey.pem;
 
-    resolver 127.0.0.11 ipv6=off valid=10s;
+    resolver 127.0.0.11;
 
     location / {
-        proxy_pass http://gateway:3000;
+        # ✅ CORS Preflight(OPTIONS) 요청을 Nginx에서 직접 처리
+        if ($request_method = 'OPTIONS') {
+            add_header 'Access-Control-Allow-Origin' 'https://www.messagoom.online';
+            add_header 'Access-Control-Allow-Methods' 'GET, POST, OPTIONS, PUT, DELETE';
+            add_header 'Access-Control-Allow-Headers' 'Content-Type, Authorization';
+            add_header 'Access-Control-Allow-Credentials' 'true';
+            add_header 'Access-Control-Max-Age' 1728000;
+            add_header 'Content-Type' 'text/plain; charset=utf-8';
+            add_header 'Content-Length' 0;
+            return 204;
+        }
+
+        # 기존 프록시 설정
+        set $upstream gateway;
+        proxy_pass http://$upstream:3000;
+        
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
