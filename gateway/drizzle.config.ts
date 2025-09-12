@@ -5,7 +5,7 @@ import * as path from 'path';
 dotenv.config({ path: path.resolve(__dirname, '.env') });
 
 export default {
-  schema: ['./src/db/schema.ts', '../chat/src/db/schema.ts', '../game/src/db/schema.ts'],
+  schema: ['./dist/src/db/schema.js', './dist/chat/src/db/schema.js', './dist/game/src/db/schema.js'],
   out: './db/migrations',
   dialect: 'postgresql',
   dbCredentials: {

@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "ENV_PATH=.env.local NODE_ENV=development nodemon --exec ts-node src/index.ts",
     "build": "tsc",
-    "start": "ENV_PATH=.env NODE_ENV=production node dist/index.js",
+    "start": "node dist/src/index.js",
     "drizzle:generate": "drizzle-kit generate",
     "drizzle:migrate": "drizzle-kit push --config=drizzle.config.js",
     "seed": "dotenv -e .env -- sh seed.sh"
