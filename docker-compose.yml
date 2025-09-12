@@ -1,6 +1,8 @@
 services:
   gateway:
-    build: ./gateway
+    build:
+      context: .
+      dockerfile: ./gateway/Dockerfile
     container_name: gateway-service
     env_file:
       - ./gateway/.env
