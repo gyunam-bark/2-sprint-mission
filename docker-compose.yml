@@ -71,7 +71,8 @@ services:
       - '443:443'
     volumes:
       - ./nginx/conf.d:/etc/nginx/conf.d:ro
-      - certbot-www:/usr/share/nginx/html
+      - ./www:/usr/share/nginx/html:ro
+      - certbot-www:/var/www/certbot
       - certbot-etc:/etc/letsencrypt:ro
     depends_on:
       - gateway
@@ -84,9 +85,9 @@ services:
     image: certbot/certbot:v2.10.0
     container_name: certbot
     volumes:
-      - certbot-www:/usr/share/nginx/html
+      - certbot-www:/var/www/certbot
       - certbot-etc:/etc/letsencrypt
-    command: renew --webroot -w /usr/share/nginx/html --quiet
+    command: renew --webroot -w /var/www/certbot --quiet
     networks:
       - app-network
 
