@@ -1,4 +1,27 @@
 # ===================================================================
+#  Builder Stage: 애플리케이션 빌드 전용 스테이지
+# ===================================================================
+FROM node:20-alpine AS builder
+
+WORKDIR /app
+
+# 네이티브 모듈 빌드에 필요한 도구 설치
+RUN apk add --no-cache python3 make g++
+
+# gateway의 package.json을 복사하여 의존성 설치
+COPY gateway/package*.json ./
+RUN npm install
+
+# TypeScript 컴파일에 필요한 모든 소스 코드를 복사
+COPY gateway/ ./
+COPY chat/ ./chat/
+COPY game/ ./game/
+
+# TypeScript 코드를 JavaScript로 컴파일하여 'dist' 폴더 생성
+RUN npm run build
+
+
+# ===================================================================
 #  Runner Stage: 실제 애플리케이션 실행 전용 스테이지
 # ===================================================================
 FROM node:20-alpine AS runner
