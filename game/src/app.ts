@@ -16,8 +16,8 @@ app.use(
     credentials: true,
   })
 );
-app.use(errorHandler);
 app.use(bodyParser());
+app.use(errorHandler);
 
 app.use(root.routes()).use(root.allowedMethods());
 app.use(players.routes()).use(players.allowedMethods());
