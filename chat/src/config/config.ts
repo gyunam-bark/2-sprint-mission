@@ -17,13 +17,13 @@ export const config = {
     env: requireEnv('NODE_ENV', 'development'),
   },
   external: {
-    gateway: requireEnv('GATEWAY_SERVICE_URL', 'http://localhost:3000'),
-    chat: requireEnv('CHAT_SERVICE_URL', 'http://localhost:3001'),
-    game: requireEnv('GAME_SERVICE_URL', 'http://localhost:3002'),
-    client: requireEnv('CLIENT_SERVICE_URL', 'http://localhost:3003'),
+    gateway: requireEnv('GATEWAY_SERVICE_URL', 'http://gateway:3000'),
+    chat: requireEnv('CHAT_SERVICE_URL', 'http://chat:3001'),
+    game: requireEnv('GAME_SERVICE_URL', 'http://game:3002'),
+    client: requireEnv('CLIENT_SERVICE_URL', 'https://www.messagoom.online'),
   },
   db: {
-    host: requireEnv('DB_HOST', 'localhost'),
+    host: requireEnv('DB_HOST', 'db'),
     port: Number(requireEnv('DB_PORT', '5432')),
     user: requireEnv('DB_USER', 'postgres'),
     password: requireEnv('DB_PASSWORD', 'postgres'),

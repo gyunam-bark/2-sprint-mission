@@ -1,4 +1,5 @@
 #!/bin/bash
+# Nginx와 Certbot을 사용하여 SSL 인증서를 발급/갱신하고 HTTPS를 설정하는 프로덕션용 스크립트
 set -e
 
 # --- 설정 변수 ---
@@ -49,6 +50,8 @@ TEST_FILE_URL="http://messagoom.online/.well-known/acme-challenge/test.txt"
 EXPECTED_CONTENT="test-ok-$(date +%s)"
 
 docker compose exec $NGINX_SERVICE mkdir -p $CHALLENGE_DIR
+# 기존 테스트 파일이 있다면 삭제하여 충돌 방지
+docker compose exec $NGINX_SERVICE rm -f $CHALLENGE_DIR/test.txt
 docker compose exec $NGINX_SERVICE sh -c "echo \"$EXPECTED_CONTENT\" > $CHALLENGE_DIR/test.txt"
 
 sleep 3
@@ -165,4 +168,4 @@ echo "모든 도메인 HTTPS 연결 확인 완료."
 echo "=== Step 8: Certbot 자동 갱신 서비스 활성화 ==="
 docker compose up -d certbot
 
-echo "SSL 인증서 발급/갱신 및 HTTPS 설정, 자동 갱신까지 완료되었습니다."
+echo "🎉 SSL 인증서 발급/갱신 및 HTTPS 설정, 자동 갱신까지 완료되었습니다."
