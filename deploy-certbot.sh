@@ -49,7 +49,7 @@ TEST_FILE_URL="http://messagoom.online/.well-known/acme-challenge/test.txt"
 EXPECTED_CONTENT="test-ok-$(date +%s)"
 
 docker compose exec $NGINX_SERVICE mkdir -p $CHALLENGE_DIR
-docker compose exec $NGINX_SERVICE sh -c "echo '$EXPECTED_CONTENT' > $CHALLENGE_DIR/test.txt"
+docker compose exec $NGINX_SERVICE sh -c "echo \"$EXPECTED_CONTENT\" > $CHALLENGE_DIR/test.txt"
 
 sleep 3
 CONTENT=$(curl -s $TEST_FILE_URL)
