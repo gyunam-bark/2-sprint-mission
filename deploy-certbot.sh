@@ -1,19 +1,26 @@
 #!/bin/bash
+# Nginx와 Certbot을 사용하여 SSL 인증서를 발급하고 HTTPS를 설정하는 프로덕션용 스크립트
 set -e
 
+# --- 설정 변수 ---
 EMAIL="gyunam.bark@gmail.com"
+# 첫 번째 도메인이 인증서 경로의 기준이 됩니다.
 DOMAINS=(-d messagoom.online -d www.messagoom.online -d api.messagoom.online)
 WEBROOT="/usr/share/nginx/html"
 CONF_DIR="./nginx/conf.d"
 NGINX_SERVICE="nginx"
 
+# --- 스크립트 시작 ---
+
 echo "=== Step 0: 기존 설정 파일 백업 ==="
 BACKUP_DIR="./nginx/conf.d/backup-$(date +%Y%m%d%H%M%S)"
 mkdir -p "$BACKUP_DIR"
+# conf.d 디렉터리에 파일이 없을 경우를 대비하여 오류를 무시합니다.
 cp $CONF_DIR/*.conf "$BACKUP_DIR"/ 2>/dev/null || true
 echo "백업 위치: $BACKUP_DIR"
 
 echo "=== Step 1: HTTP-01 챌린지용 Nginx 설정 작성 ==="
+# Step 5에서 HTTPS 설정으로 덮어씌워질 임시 파일들입니다.
 cat > $CONF_DIR/_main.conf <<'EOF'
 EOF
 cat > $CONF_DIR/www.conf <<'EOF'
@@ -42,6 +49,7 @@ sleep 5
 echo "=== Step 3: 챌린지 테스트 파일 배치 및 확인 ==="
 CHALLENGE_DIR="$WEBROOT/.well-known/acme-challenge"
 TEST_FILE_URL="http://messagoom.online/.well-known/acme-challenge/test.txt"
+# 캐시 문제를 방지하기 위해 매번 다른 내용을 생성합니다.
 EXPECTED_CONTENT="test-ok-$(date +%s)"
 
 echo "Nginx 컨테이너 내부에 테스트 파일 생성 중..."
@@ -61,7 +69,8 @@ else
     exit 1
 fi
 
-echo "=== Step 4: Certbot으로 SSL 인증서 발급/갱신 실행 ==="
+echo "=== Step 4: Certbot으로 SSL 인증서 발급 또는 갱신 시도 ==="
+# --force-renewal 옵션을 제거하여, 인증서가 유효하면 갱신을 건너뛰도록 합니다.
 docker compose run --rm certbot certonly \
   --webroot -w $WEBROOT \
   "${DOMAINS[@]}" \
@@ -70,7 +79,6 @@ docker compose run --rm certbot certonly \
   --non-interactive \
   --agree-tos \
   -m "$EMAIL" \
-  --force-renewal \
   -v
 
 echo "=== Step 5: HTTPS 적용을 위한 Nginx 설정 작성 ==="
