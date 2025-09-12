@@ -116,6 +116,7 @@ server {
     location /.well-known/acme-challenge/ { root /var/www/certbot; }
     location / { return 301 https://$host$request_uri; }
 }
+
 server {
     listen 443 ssl;
     http2 on;
@@ -127,7 +128,7 @@ server {
     resolver 127.0.0.11;
 
     location / {
-        # ✅ CORS Preflight(OPTIONS) 요청을 Nginx에서 직접 처리
+        # ✅ CORS Preflight 처리
         if ($request_method = 'OPTIONS') {
             add_header 'Access-Control-Allow-Origin' 'https://www.messagoom.online';
             add_header 'Access-Control-Allow-Methods' 'GET, POST, OPTIONS, PUT, DELETE';
@@ -139,10 +140,14 @@ server {
             return 204;
         }
 
-        # 기존 프록시 설정
+        # ✅ WebSocket 지원 프록시
         set $upstream gateway;
         proxy_pass http://$upstream:3000;
         
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
