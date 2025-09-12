@@ -1,4 +1,3 @@
-# --- build stage ---
 FROM node:20-alpine AS builder
 WORKDIR /app
 
@@ -13,11 +12,10 @@ COPY game/ ./game
 
 RUN npm run build
 
-# --- runtime stage ---
 FROM node:20-alpine AS runner
 WORKDIR /app
 
-RUN apk add --no-cache postgresql-client
+RUN apk add --no-cache postgresql-client netcat-openbsd
 
 COPY gateway/package*.json ./
 RUN npm ci
@@ -31,7 +29,9 @@ COPY --from=builder /app/game/src/db/schema.ts ./game/src/db/schema.ts
 COPY gateway/entrypoint.sh /entrypoint.sh
 COPY gateway/seed.sh ./seed.sh
 COPY gateway/seed.sql ./seed.sql
-RUN chmod +x /entrypoint.sh ./seed.sh
+COPY gateway/wait-for-postgres.sh /wait-for-postgres.sh
+RUN chmod +x /entrypoint.sh ./seed.sh /wait-for-postgres.sh
 
 EXPOSE 3000
-ENTRYPOINT ["/entrypoint.sh"]
+ENTRYPOINT ["/wait-for-postgres.sh", "db", "/entrypoint.sh"]
+
