@@ -1,7 +1,6 @@
 export function getAuthToken(): string | null {
   return sessionStorage.getItem('accessToken');
 }
-
 export function createWebSocket(
   url: string,
   onOpen: (ws: WebSocket) => void,
@@ -9,7 +8,18 @@ export function createWebSocket(
   onClose?: () => void,
   onError?: (err: Event) => void
 ): WebSocket {
-  const ws = new WebSocket(url);
+  const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
+
+  let finalUrl = url;
+  if (url.startsWith('http://') || url.startsWith('https://')) {
+    finalUrl = url.replace(/^http/, protocol);
+  } else if (url.startsWith('ws://') || url.startsWith('wss://')) {
+    finalUrl = url; // 이미 올바른 경우
+  } else {
+    finalUrl = `${protocol}://${url}`;
+  }
+
+  const ws = new WebSocket(finalUrl);
 
   ws.onopen = () => onOpen(ws);
 
