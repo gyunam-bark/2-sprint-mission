@@ -5,7 +5,7 @@ set -e
 # --- 설정 변수 ---
 EMAIL="gyunam.bark@gmail.com"
 DOMAINS=(-d messagoom.online -d www.messagoom.online -d api.messagoom.online -d deploy.messagoom.online)
-WEBROOT="/var/www/certbot" 
+WEBROOT="/var/www/certbot"
 CONF_DIR="./nginx/conf.d"
 NGINX_SERVICE="nginx"
 CERT_PATH="/etc/letsencrypt/live/messagoom.online/fullchain.pem"
@@ -50,7 +50,6 @@ TEST_FILE_URL="http://messagoom.online/.well-known/acme-challenge/test.txt"
 EXPECTED_CONTENT="test-ok-$(date +%s)"
 
 docker compose exec $NGINX_SERVICE mkdir -p $CHALLENGE_DIR
-# 기존 테스트 파일이 있다면 삭제하여 충돌 방지
 docker compose exec $NGINX_SERVICE rm -f $CHALLENGE_DIR/test.txt
 docker compose exec $NGINX_SERVICE sh -c "echo \"$EXPECTED_CONTENT\" > $CHALLENGE_DIR/test.txt"
 
@@ -126,11 +125,10 @@ server {
     ssl_certificate /etc/letsencrypt/live/messagoom.online/fullchain.pem;
     ssl_certificate_key /etc/letsencrypt/live/messagoom.online/privkey.pem;
 
+    resolver 127.0.0.11 ipv6=off valid=10s;
+
     location / {
-        # Docker의 DNS를 동적으로 사용하기 위해 변수를 설정합니다.
-        set $upstream_gateway gateway;
-        proxy_pass http://$upstream_gateway:3000;
-        
+        proxy_pass http://gateway:3000;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
@@ -168,4 +166,4 @@ echo "모든 도메인 HTTPS 연결 확인 완료."
 echo "=== Step 8: Certbot 자동 갱신 서비스 활성화 ==="
 docker compose up -d certbot
 
-echo "🎉 SSL 인증서 발급/갱신 및 HTTPS 설정, 자동 갱신까지 완료되었습니다."
+echo "SSL 인증서 발급/갱신 및 HTTPS 설정, 자동 갱신까지 완료되었습니다."
