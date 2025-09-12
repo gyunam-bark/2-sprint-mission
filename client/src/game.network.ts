@@ -7,7 +7,7 @@ let gameSocket: WebSocket;
 
 export function initGameNetwork() {
   gameSocket = createWebSocket(
-    'ws://api.messagoom.online/game',
+    'wss://api.messagoom.online/game',
     (ws) => {
       const token = getAuthToken();
       if (token) {
