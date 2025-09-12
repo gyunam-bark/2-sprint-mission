@@ -7,17 +7,19 @@ FROM node:20-alpine AS builder
 
 WORKDIR /app
 
+# ✅ [수정] 네이티브 모듈 빌드에 필요한 도구 설치 라인 추가
+RUN apk add --no-cache python3 make g++
+
 # gateway의 package.json을 복사하여 의존성 설치
 COPY gateway/package*.json ./
 RUN npm install
 
-# (수정) TypeScript 컴파일에 필요한 모든 소스 코드를 복사합니다.
+# TypeScript 컴파일에 필요한 모든 소스 코드를 복사
 COPY gateway/ ./
 COPY chat/ ./chat/
 COPY game/ ./game/
 
 # TypeScript 코드를 JavaScript로 컴파일하여 'dist' 폴더 생성
-# 이제 빌드 시 chat/와 game/의 파일을 참조할 수 있습니다.
 RUN npm run build
 
 
@@ -39,10 +41,11 @@ RUN npm ci --omit=dev
 # builder 스테이지로부터 컴파일된 'dist' 폴더 전체를 복사
 COPY --from=builder /app/dist ./dist
 
-# Drizzle 마이그레이션에 필요한 모든 schema 파일과 설정 파일을 복사합니다.
-COPY --from=builder /app/drizzle.config.js ./
+# Drizzle 설정 파일을 'dist' 폴더에서 복사
+COPY --from=builder /app/dist/drizzle.config.js ./
+
+# Drizzle 마이그레이션에 필요한 schema 소스 파일들을 복사
 COPY --from=builder /app/src/db/schema.ts ./src/db/schema.ts
-# (수정) chat과 game의 schema.ts 파일도 포함시킵니다.
 COPY --from=builder /app/chat/src/db/schema.ts ./chat/src/db/schema.ts
 COPY --from=builder /app/game/src/db/schema.ts ./game/src/db/schema.ts
 
