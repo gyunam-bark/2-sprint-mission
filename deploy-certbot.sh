@@ -1,33 +1,30 @@
 #!/bin/bash
-# Nginx와 Certbot을 사용하여 SSL 인증서를 발급하고 HTTPS를 설정하는 프로덕션용 스크립트
 set -e
 
 # --- 설정 변수 ---
 EMAIL="gyunam.bark@gmail.com"
-# 첫 번째 도메인이 인증서 경로의 기준이 됩니다.
-DOMAINS=(-d messagoom.online -d www.messagoom.online -d api.messagoom.online)
-WEBROOT="/usr/share/nginx/html"
+DOMAINS=(-d messagoom.online -d www.messagoom.online -d api.messagoom.online -d temp-deploy.messagoom.online)
+WEBROOT="/var/www/certbot" 
 CONF_DIR="./nginx/conf.d"
 NGINX_SERVICE="nginx"
+CERT_PATH="/etc/letsencrypt/live/messagoom.online/fullchain.pem"
 
 # --- 스크립트 시작 ---
 
 echo "=== Step 0: 기존 설정 파일 백업 ==="
 BACKUP_DIR="./nginx/conf.d/backup-$(date +%Y%m%d%H%M%S)"
 mkdir -p "$BACKUP_DIR"
-# conf.d 디렉터리에 파일이 없을 경우를 대비하여 오류를 무시합니다.
 cp $CONF_DIR/*.conf "$BACKUP_DIR"/ 2>/dev/null || true
 echo "백업 위치: $BACKUP_DIR"
 
 echo "=== Step 1: HTTP-01 챌린지용 Nginx 설정 작성 ==="
-# Step 5에서 HTTPS 설정으로 덮어씌워질 임시 파일들입니다.
 cat > $CONF_DIR/_main.conf <<'EOF'
 EOF
 cat > $CONF_DIR/www.conf <<'EOF'
 server {
     listen 80;
-    server_name messagoom.online www.messagoom.online;
-    location /.well-known/acme-challenge/ { root /usr/share/nginx/html; }
+    server_name messagoom.online www.messagoom.online temp-deploy.messagoom.online;
+    location /.well-known/acme-challenge/ { root /var/www/certbot; }
     location / { return 301 https://$host$request_uri; }
 }
 EOF
@@ -35,7 +32,7 @@ cat > $CONF_DIR/api.conf <<'EOF'
 server {
     listen 80;
     server_name api.messagoom.online;
-    location /.well-known/acme-challenge/ { root /usr/share/nginx/html; }
+    location /.well-known/acme-challenge/ { root /var/www/certbot; }
     location / { return 301 https://$host$request_uri; }
 }
 EOF
@@ -49,14 +46,11 @@ sleep 5
 echo "=== Step 3: 챌린지 테스트 파일 배치 및 확인 ==="
 CHALLENGE_DIR="$WEBROOT/.well-known/acme-challenge"
 TEST_FILE_URL="http://messagoom.online/.well-known/acme-challenge/test.txt"
-# 캐시 문제를 방지하기 위해 매번 다른 내용을 생성합니다.
 EXPECTED_CONTENT="test-ok-$(date +%s)"
 
-echo "Nginx 컨테이너 내부에 테스트 파일 생성 중..."
 docker compose exec $NGINX_SERVICE mkdir -p $CHALLENGE_DIR
 docker compose exec $NGINX_SERVICE sh -c "echo '$EXPECTED_CONTENT' > $CHALLENGE_DIR/test.txt"
 
-echo "HTTP를 통해 테스트 파일 접근 및 내용 확인 중..."
 sleep 3
 CONTENT=$(curl -s $TEST_FILE_URL)
 
@@ -70,16 +64,26 @@ else
 fi
 
 echo "=== Step 4: Certbot으로 SSL 인증서 발급 또는 갱신 시도 ==="
-# --force-renewal 옵션을 제거하여, 인증서가 유효하면 갱신을 건너뛰도록 합니다.
-docker compose run --rm certbot certonly \
-  --webroot -w $WEBROOT \
-  "${DOMAINS[@]}" \
-  --preferred-challenges http-01 \
-  --http-01-port 80 \
-  --non-interactive \
-  --agree-tos \
-  -m "$EMAIL" \
-  -v
+if docker compose exec $NGINX_SERVICE test -f $CERT_PATH; then
+    echo "기존 인증서 발견 → 갱신 시도"
+    docker compose run --rm certbot renew \
+      --webroot -w $WEBROOT \
+      --preferred-challenges http-01 \
+      --http-01-port 80 \
+      --non-interactive \
+      -v
+else
+    echo "기존 인증서 없음 → 새로 발급"
+    docker compose run --rm certbot certonly \
+      --webroot -w $WEBROOT \
+      "${DOMAINS[@]}" \
+      --preferred-challenges http-01 \
+      --http-01-port 80 \
+      --non-interactive \
+      --agree-tos \
+      -m "$EMAIL" \
+      -v
+fi
 
 echo "=== Step 5: HTTPS 적용을 위한 Nginx 설정 작성 ==="
 cat > $CONF_DIR/_main.conf <<'EOF'
@@ -88,14 +92,14 @@ EOF
 cat > $CONF_DIR/www.conf <<'EOF'
 server {
     listen 80;
-    server_name messagoom.online www.messagoom.online;
-    location /.well-known/acme-challenge/ { root /usr/share/nginx/html; }
+    server_name messagoom.online www.messagoom.online temp-deploy.messagoom.online;
+    location /.well-known/acme-challenge/ { root /var/www/certbot; }
     location / { return 301 https://$host$request_uri; }
 }
 server {
     listen 443 ssl;
     http2 on;
-    server_name messagoom.online www.messagoom.online;
+    server_name messagoom.online www.messagoom.online temp-deploy.messagoom.online;
     ssl_certificate /etc/letsencrypt/live/messagoom.online/fullchain.pem;
     ssl_certificate_key /etc/letsencrypt/live/messagoom.online/privkey.pem;
     root /usr/share/nginx/html;
@@ -107,7 +111,7 @@ cat > $CONF_DIR/api.conf <<'EOF'
 server {
     listen 80;
     server_name api.messagoom.online;
-    location /.well-known/acme-challenge/ { root /usr/share/nginx/html; }
+    location /.well-known/acme-challenge/ { root /var/www/certbot; }
     location / { return 301 https://$host$request_uri; }
 }
 server {
@@ -117,8 +121,7 @@ server {
     ssl_certificate /etc/letsencrypt/live/messagoom.online/fullchain.pem;
     ssl_certificate_key /etc/letsencrypt/live/messagoom.online/privkey.pem;
     location / {
-        set $upstream_gateway http://gateway:3000;
-        proxy_pass $upstream_gateway;
+        proxy_pass http://gateway:3000;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
@@ -135,10 +138,25 @@ echo "Nginx가 새 설정을 적용할 때까지 3초 대기..."
 sleep 3
 curl -v --fail https://messagoom.online || { echo "ERROR: HTTPS check failed for messagoom.online"; exit 1; }
 curl -v --fail https://www.messagoom.online || { echo "ERROR: HTTPS check failed for www.messagoom.online"; exit 1; }
-curl -v --fail https://api.messagoom.online || { echo "ERROR: HTTPS check failed for api.messagoom.online"; exit 1; }
+curl -v --fail https://temp-deploy.messagoom.online || { echo "ERROR: HTTPS check failed for temp-deploy.messagoom.online"; exit 1; }
+
+# API 서비스는 준비가 늦을 수 있으므로 최대 30초 재시도
+echo "API 서비스 준비 대기 중..."
+for i in {1..30}; do
+  if curl -s https://api.messagoom.online >/dev/null; then
+    echo "API 준비 완료!"
+    break
+  fi
+  sleep 1
+  if [ $i -eq 30 ]; then
+    echo "ERROR: HTTPS check failed for api.messagoom.online (30초 대기 후에도 실패)"
+    exit 1
+  fi
+done
+
 echo "모든 도메인 HTTPS 연결 확인 완료."
 
 echo "=== Step 8: Certbot 자동 갱신 서비스 활성화 ==="
 docker compose up -d certbot
 
-echo "SSL 인증서 발급 및 HTTPS 설정, 자동 갱신까지 모두 완료되었습니다."
+echo "SSL 인증서 발급/갱신 및 HTTPS 설정, 자동 갱신까지 완료되었습니다."

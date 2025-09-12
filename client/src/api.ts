@@ -8,7 +8,7 @@ export async function fetchMapData(): Promise<MapData> {
   const token = getAuthToken();
   if (!token) throw new Error('로그인이 필요합니다.');
 
-  const response = await fetch('http://api.messagoom.online/game/maps', {
+  const response = await fetch('https://api.messagoom.online/game/maps', {
     headers: { Authorization: `Bearer ${token}` },
   });
 
