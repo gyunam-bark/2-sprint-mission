@@ -11,6 +11,7 @@ import game from './proxy/game.proxy';
 import { config } from './config/config';
 
 const app = new Koa();
+app.proxy = true;
 
 app.use(
   cors({
