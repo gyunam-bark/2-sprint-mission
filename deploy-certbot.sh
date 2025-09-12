@@ -3,7 +3,7 @@ set -e
 
 # --- 설정 변수 ---
 EMAIL="gyunam.bark@gmail.com"
-DOMAINS=(-d messagoom.online -d www.messagoom.online -d api.messagoom.online -d temp-deploy.messagoom.online)
+DOMAINS=(-d messagoom.online -d www.messagoom.online -d api.messagoom.online -d deploy.messagoom.online)
 WEBROOT="/var/www/certbot" 
 CONF_DIR="./nginx/conf.d"
 NGINX_SERVICE="nginx"
@@ -23,7 +23,7 @@ EOF
 cat > $CONF_DIR/www.conf <<'EOF'
 server {
     listen 80;
-    server_name messagoom.online www.messagoom.online temp-deploy.messagoom.online;
+    server_name messagoom.online www.messagoom.online deploy.messagoom.online;
     location /.well-known/acme-challenge/ { root /var/www/certbot; }
     location / { return 301 https://$host$request_uri; }
 }
@@ -92,14 +92,14 @@ EOF
 cat > $CONF_DIR/www.conf <<'EOF'
 server {
     listen 80;
-    server_name messagoom.online www.messagoom.online temp-deploy.messagoom.online;
+    server_name messagoom.online www.messagoom.online deploy.messagoom.online;
     location /.well-known/acme-challenge/ { root /var/www/certbot; }
     location / { return 301 https://$host$request_uri; }
 }
 server {
     listen 443 ssl;
     http2 on;
-    server_name messagoom.online www.messagoom.online temp-deploy.messagoom.online;
+    server_name messagoom.online www.messagoom.online deploy.messagoom.online;
     ssl_certificate /etc/letsencrypt/live/messagoom.online/fullchain.pem;
     ssl_certificate_key /etc/letsencrypt/live/messagoom.online/privkey.pem;
     root /usr/share/nginx/html;
@@ -107,6 +107,7 @@ server {
     location / { try_files $uri $uri/ /index.html; }
 }
 EOF
+
 cat > $CONF_DIR/api.conf <<'EOF'
 server {
     listen 80;
@@ -118,10 +119,15 @@ server {
     listen 443 ssl;
     http2 on;
     server_name api.messagoom.online;
+
     ssl_certificate /etc/letsencrypt/live/messagoom.online/fullchain.pem;
     ssl_certificate_key /etc/letsencrypt/live/messagoom.online/privkey.pem;
+
     location / {
-        proxy_pass http://gateway:3000;
+        # Docker의 DNS를 동적으로 사용하기 위해 변수를 설정합니다.
+        set $upstream_gateway gateway;
+        proxy_pass http://$upstream_gateway:3000;
+        
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
@@ -138,7 +144,7 @@ echo "Nginx가 새 설정을 적용할 때까지 3초 대기..."
 sleep 3
 curl -v --fail https://messagoom.online || { echo "ERROR: HTTPS check failed for messagoom.online"; exit 1; }
 curl -v --fail https://www.messagoom.online || { echo "ERROR: HTTPS check failed for www.messagoom.online"; exit 1; }
-curl -v --fail https://temp-deploy.messagoom.online || { echo "ERROR: HTTPS check failed for temp-deploy.messagoom.online"; exit 1; }
+curl -v --fail https://deploy.messagoom.online || { echo "ERROR: HTTPS check failed for deploy.messagoom.online"; exit 1; }
 
 # API 서비스는 준비가 늦을 수 있으므로 최대 30초 재시도
 echo "API 서비스 준비 대기 중..."
